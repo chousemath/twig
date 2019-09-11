@@ -1,14 +1,29 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>
-      Ionic Blank
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content>
-  <div class="ion-padding">
-    The world is your oyster.
-    <p>If you get lost, the <a target="_blank" rel="noopener" href="https://ionicframework.com/docs/">docs</a> will be your guide.</p>
+  <ion-slides style="width: 100vw; height: 100vh;" pager="false" [options]="slideOpts">
+    <ion-slide style="background-color: azure;">
+      <h1>Slide 1</h1>
+    </ion-slide>
+    <ion-slide>
+      <h1>Slide 2</h1>
+    </ion-slide>
+    <ion-slide>
+      <h1>Slide 3</h1>
+    </ion-slide>
+    <ion-slide>
+      <h1>Slide 4</h1>
+    </ion-slide>
+    <ion-slide>
+      <h1>Slide 5</h1>
+    </ion-slide>
+    <ion-slide>
+      <h1>Slide 6</h1>
+    </ion-slide>
+  </ion-slides>
+
+  <div id="slide-navigation-bar">
+    <div class="section-left"></div>
+    <div class="section-center"></div>
+    <div class="section-right"></div>
   </div>
+
 </ion-content>

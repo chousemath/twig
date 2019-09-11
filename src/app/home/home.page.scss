@@ -1,1 +1,31 @@
-
+$nav-height: 75px;
+#slide-navigation-bar {
+  width: 100vw; 
+  height: $nav-height; 
+  background-color: gray; 
+  position: fixed; 
+  top: calc(50vh - #{$nav-height}); 
+  left: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: row;
+  .section-generic {
+    width: $nav-height;
+    height: $nav-height;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: azure;
+  }
+  .section-left {
+    @extend .section-generic;
+  }
+  .section-center {
+    height: $nav-height;
+    flex: 1;
+    background-color: red;
+  }
+  .section-right {
+    @extend .section-generic;
+  }
+}
