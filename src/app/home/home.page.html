@@ -12,20 +12,47 @@
       <h1>Slide 2</h1>
     </ion-slide>
     <ion-slide>
-      <div class="spec-container">
-        <div class="spec-container-inner">
-          <app-progress
-          [textTop1]="'aaa'"
-          [textTop2]="'bbb'"
-          [value]="120"
-          [unit]="'lx'"
-          [progress]="45"
-          ></app-progress>
+      <div class="container-page">
+        <div class="spec-spacer-header"></div>
+        <div class="spec-title-container">
         </div>
+        <div class="spec-spacer-1"></div>
+        <div class="spec-container">
+          <div class="spec-container-inner">
+            <app-progress
+              [textTop1]="'컨디션'"
+              [textTop2]=""
+              [value]="currentStatus"
+              [unit]=""
+              [progress]="45"
+            ></app-progress>
+          </div>
+        </div>
+        <div class="spec-spacer-2"></div>
+        <div class="spec-spacer-footer"></div>
       </div>
     </ion-slide>
     <ion-slide>
-      <h1>Slide 4</h1>
+      <div class="container-page">
+        <div class="spec-spacer-header"></div>
+        <div class="spec-title-container">
+          <span *ngIf="currentTitle">{{ currentTitle }}</span>
+        </div>
+        <div class="spec-spacer-1"></div>
+        <div class="spec-container">
+          <div class="spec-container-inner">
+            <app-progress
+              [textTop1]="'컨디션'"
+              [textTop2]=""
+              [value]="currentStatus"
+              [unit]=""
+              [progress]="45"
+            ></app-progress>
+          </div>
+        </div>
+        <div class="spec-spacer-2"></div>
+        <div class="spec-spacer-footer"></div>
+      </div>
     </ion-slide>
     <ion-slide>
       <h1>Slide 5</h1>

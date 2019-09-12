@@ -14,7 +14,13 @@ export class HomePage {
     initialSlide: 2,
     speed: 400
   };
-  constructor() {}
+
+  public currentStatus = '';
+  public currentTitle = '';
+
+  constructor() {
+    this.currentStatus = 'Healthy';
+  }
   public slidePrev() {
     this.slides.slidePrev();
   }
