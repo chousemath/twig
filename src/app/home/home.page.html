@@ -150,6 +150,20 @@
     </ion-slide>
   </ion-slides>
 
+  <div id="name-container">
+    <div class="upper">
+      <div class="upper-inner">
+        <div class="upper-inner-left">
+            {{ name }}
+        </div>
+        <div class="upper-inner-right">
+          <img [src]="imgPencil" id="img-pencil" />
+        </div>
+      </div>
+    </div>
+    <div class="lower">{{ subname }}</div>
+  </div>
+
   <div id="slide-navigation-bar">
     <div class="section-left">
       <img [src]="imgLeft" class="navigation-arrow" (click)="slidePrev()" />

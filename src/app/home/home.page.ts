@@ -35,6 +35,7 @@ export class HomePage {
   @ViewChild(IonSlides, { static: false }) slides: IonSlides;
   public imgLeft = 'assets/images/navigate-left.png';
   public imgRight = 'assets/images/navigate-right.png';
+  public imgPencil = 'assets/images/icon-pencil.png';
   public slideOpts = {
     initialSlide: 2,
     speed: 400,
@@ -87,13 +88,16 @@ export class HomePage {
 
   private slideChange$: Subscription;
 
+  public name = '황금술통선인장';
+  public subname = 'Golden Barrel';
+
   constructor() {
     this.randomData();
     this.randInterval = setInterval(() => this.randomData(), 500);
   }
 
   ionViewDidEnter() {
-    this.slideChange$ = this.slides.ionSlideDidChange.subscribe((event) => {
+    this.slideChange$ = this.slides.ionSlideDidChange.subscribe(() => {
       this.ionSlideDidChange();
     });
   }

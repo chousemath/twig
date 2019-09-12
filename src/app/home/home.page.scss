@@ -2,6 +2,8 @@ $nav-height: 50px;
 $nav-icon: 45px;
 $header-height: 75px;
 $indicator-height: 50px;
+$name-height: 75px;
+$footer-height: 35px;
 .bg-image {
   background: url('../../assets/images/default-bg.jpg') no-repeat center center fixed;
   background-size: cover;
@@ -43,12 +45,12 @@ $indicator-height: 50px;
   .spec-spacer-2 {
     display: flex;
     width: 100vw;
-    height: 75px;
+    height: $name-height;
   }
   .spec-spacer-footer {
     display: flex;
     width: 100vw;
-    height: 35px;
+    height: $footer-height;
   }
   .spec-container {
     @extend .flex-center;
@@ -69,6 +71,48 @@ $indicator-height: 50px;
         }
       }
     }
+  }
+}
+
+#name-container {
+  width: 100vw;
+  height: $name-height;
+  display: flex;
+  bottom: calc(#{$footer-height} - 24px);
+  left: 0;
+  position: fixed;
+  z-index: 9999;
+  flex-direction: column;
+  color: #fff;
+  .upper {
+    @extend .flex-center;
+    width: 100vw;
+    height: 28px;
+    font-size: 20px;
+    .upper-inner {
+      display: flex;
+      flex-direction: row;
+      .upper-inner-left {
+        height: 100%;
+        @extend .flex-center;
+      }
+      .upper-inner-right {
+        width: 24px;
+        height: 100%;
+        @extend .flex-center;
+        padding-top: 8px;
+        #img-pencil {
+          width: 16px;
+          height: 16px;
+        }
+      }
+    }
+  }
+  .lower {
+    @extend .flex-center;
+    width: 100vw;
+    height: 24px;
+    font-size: 16px;
   }
 }
 
