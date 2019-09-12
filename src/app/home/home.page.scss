@@ -1,5 +1,7 @@
 $nav-height: 50px;
 $nav-icon: 45px;
+$header-height: 75px;
+$indicator-height: 50px;
 .bg-image {
   background: url('../../assets/images/default-bg.jpg') no-repeat center center fixed;
   background-size: cover;
@@ -32,7 +34,7 @@ $nav-icon: 45px;
   .spec-spacer-header {
     display: flex;
     width: 100vw;
-    height: 50px;
+    height: $header-height;
   }
   .spec-spacer-1 {
     display: flex;
@@ -53,6 +55,55 @@ $nav-icon: 45px;
     width: 100vw;
     .spec-container-inner {
       width: calc(100vw - 82px);
+      .spec-split-container {
+        display: flex;
+        flex: 1;
+        flex-direction: row;
+        .left {
+          flex: 1;
+          padding-right: 8px;
+        }
+        .right {
+          flex: 1;
+          padding-left: 8px;
+        }
+      }
+    }
+  }
+}
+
+#slide-indicator-container {
+  width: 100vw;
+  height: $header-height;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  .indicator-icon {
+    width: 15px;
+    height: 15px;
+  }
+  #slide-indicator-dot-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+  }
+  #slide-indicator {
+    width: 100vw;
+    height: $indicator-height;
+    display: flex;
+    flex-direction: row;
+    .slide-indicator-spacer {
+      display: flex;
+      flex: 1;
+    }
+    .slide-indicator-slot {
+      @extend .flex-center;
+      width: 30px;
+      height: 100%;
     }
   }
 }

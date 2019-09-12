@@ -1,5 +1,30 @@
 import { Component, ViewChild } from '@angular/core';
 import { IonSlides } from '@ionic/angular';
+import { Subscription } from 'rxjs';
+
+const defaultProgress = 50;
+enum SpecStatus {
+  Appropriate = '적정',
+  Shortage = '부족',
+  Good = '좋음',
+  Bad = '나쁨',
+}
+const icons = [
+  'assets/images/icon-fertility.png',
+  'assets/images/icon-temperature.png',
+  'assets/images/icon-current.png',
+  'assets/images/icon-luminosity.png',
+  'assets/images/icon-humidity.png',
+  'assets/images/icon-dust.png',
+];
+const iconLimit = icons.length;
+const safeIcon = (i: number): string => {
+  if (i >= 0 && i < iconLimit) {
+    return icons[i];
+  }
+  console.log(`hide: ${i}`);
+  return '';
+};
 
 @Component({
   selector: 'app-home',
@@ -7,24 +32,123 @@ import { IonSlides } from '@ionic/angular';
   styleUrls: ['home.page.scss'],
 })
 export class HomePage {
-  @ViewChild(IonSlides, {static: false}) slides: IonSlides;
+  @ViewChild(IonSlides, { static: false }) slides: IonSlides;
   public imgLeft = 'assets/images/navigate-left.png';
   public imgRight = 'assets/images/navigate-right.png';
   public slideOpts = {
     initialSlide: 2,
-    speed: 400
+    speed: 400,
   };
 
-  public currentStatus = '';
+  public showIndicatorDot = false;
+  public indicatorDot = icons[2];
+
+  public indicator0 = '';
+  public indicator1 = '';
+  public indicator2 = '';
+  public indicator3 = icons[0];
+  public indicator4 = icons[1];
+  public indicator5 = icons[2];
+  public indicator6 = icons[3];
+  public indicator7 = icons[4];
+  public indicator8 = icons[5];
+  public indicator9 = '';
+  public indicator10 = '';
+
+  private randInterval: any;
+
+  public fertility = 0;
+  public fertilityProgress = defaultProgress;
+  public fertilityStatus = SpecStatus.Appropriate.valueOf();
+
+  public temperature = 0;
+  public temperatureProgress = defaultProgress;
+  public temperatureStatus = SpecStatus.Appropriate.valueOf();
+
+  public currentStatus = 'Healthy';
   public currentTitle = '';
+  public currentProgress = defaultProgress;
+
+  public luminosity = 0;
+  public luminosityProgress = defaultProgress;
+  public luminosityStatus = SpecStatus.Appropriate.valueOf();
+
+  public humidity = 0;
+  public humidityProgress = defaultProgress;
+  public humidityStatus = SpecStatus.Appropriate.valueOf();
+
+  public co2 = 0;
+  public co2Progress = defaultProgress;
+  public co2Status = SpecStatus.Good.valueOf();
+
+  public dust = 0;
+  public dustProgress = defaultProgress;
+  public dustStatus = SpecStatus.Good.valueOf();
+
+  private slideChange$: Subscription;
 
   constructor() {
-    this.currentStatus = 'Healthy';
+    this.randomData();
+    this.randInterval = setInterval(() => this.randomData(), 500);
   }
+
+  ionViewDidEnter() {
+    this.slideChange$ = this.slides.ionSlideDidChange.subscribe((event) => {
+      this.ionSlideDidChange();
+    });
+  }
+
+  ionViewWillLeave() {
+    clearInterval(this.randInterval);
+    if (this.slideChange$) {
+      this.slideChange$.unsubscribe();
+    }
+  }
+
+  private async ionSlideDidChange() {
+    const i: number = await this.slides.getActiveIndex();
+    this.showIndicatorDot = i !== 2;
+
+    console.log(i);
+    this.indicator0 = safeIcon(i - 5);
+    this.indicator1 = safeIcon(i - 4);
+    this.indicator2 = safeIcon(i - 3);
+    this.indicator3 = safeIcon(i - 2);
+    this.indicator4 = safeIcon(i - 1);
+    this.indicator5 = safeIcon(i);
+    this.indicator6 = safeIcon(i + 1);
+    this.indicator7 = safeIcon(i + 2);
+    this.indicator8 = safeIcon(i + 3);
+    this.indicator9 = safeIcon(i + 4);
+    this.indicator10 = safeIcon(i + 5);
+  }
+
   public slidePrev() {
     this.slides.slidePrev();
   }
   public slideNext() {
     this.slides.slideNext();
+  }
+
+  private randomData() {
+    this.fertility = Math.round(Math.random() * 100);
+    this.fertilityProgress = this.fertility;
+
+    this.temperature = 20 + Math.round(Math.random() * 20);
+    this.temperatureProgress = this.temperature;
+
+    this.currentProgress = Math.round(Math.random() * 100);
+
+    this.luminosity = 100 + Math.round(Math.random() * 100);
+    this.luminosityProgress = Math.round(100 * (this.luminosity / 200));
+
+    this.humidity = Math.round(Math.random() * 100);
+    this.humidityProgress = this.humidity;
+
+    this.co2 = 100 + Math.round(Math.random() * 100);
+    this.co2Progress = Math.round(100 * (this.co2 / 200));
+
+    this.dust = 100 + Math.round(Math.random() * 100);
+    this.dustProgress = Math.round(100 * (this.dust / 200));
   }
 }

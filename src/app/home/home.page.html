@@ -6,25 +6,20 @@
     [options]="slideOpts"
   >
     <ion-slide>
-      <h1>Slide 1</h1>
-    </ion-slide>
-    <ion-slide>
-      <h1>Slide 2</h1>
-    </ion-slide>
-    <ion-slide>
       <div class="container-page">
         <div class="spec-spacer-header"></div>
         <div class="spec-title-container">
+          <span class="title-text">비옥도</span>
         </div>
         <div class="spec-spacer-1"></div>
         <div class="spec-container">
           <div class="spec-container-inner">
             <app-progress
-              [textTop1]="'컨디션'"
+              [textTop1]="fertilityStatus"
               [textTop2]=""
-              [value]="currentStatus"
-              [unit]=""
-              [progress]="45"
+              [value]="fertility"
+              [unit]="'%'"
+              [progress]="fertilityProgress"
             ></app-progress>
           </div>
         </div>
@@ -36,17 +31,17 @@
       <div class="container-page">
         <div class="spec-spacer-header"></div>
         <div class="spec-title-container">
-          <span *ngIf="currentTitle">{{ currentTitle }}</span>
+          <span class="title-text">토양온도</span>
         </div>
         <div class="spec-spacer-1"></div>
         <div class="spec-container">
           <div class="spec-container-inner">
             <app-progress
-              [textTop1]="'컨디션'"
+              [textTop1]="temperatureStatus"
               [textTop2]=""
-              [value]="currentStatus"
-              [unit]=""
-              [progress]="45"
+              [value]="temperature"
+              [unit]="'c°'"
+              [progress]="temperatureProgress"
             ></app-progress>
           </div>
         </div>
@@ -55,10 +50,103 @@
       </div>
     </ion-slide>
     <ion-slide>
-      <h1>Slide 5</h1>
+      <div class="container-page">
+        <div class="spec-spacer-header"></div>
+        <div class="spec-title-container"></div>
+        <div class="spec-spacer-1"></div>
+        <div class="spec-container">
+          <div class="spec-container-inner">
+            <app-progress
+              [textTop1]="'컨디션'"
+              [textTop2]=""
+              [value]="currentStatus"
+              [unit]=""
+              [progress]="currentProgress"
+            ></app-progress>
+          </div>
+        </div>
+        <div class="spec-spacer-2"></div>
+        <div class="spec-spacer-footer"></div>
+      </div>
     </ion-slide>
     <ion-slide>
-      <h1>Slide 6</h1>
+      <div class="container-page">
+        <div class="spec-spacer-header"></div>
+        <div class="spec-title-container">
+          <span class="title-text">화분조도</span>
+        </div>
+        <div class="spec-spacer-1"></div>
+        <div class="spec-container">
+          <div class="spec-container-inner">
+            <app-progress
+              [textTop1]="luminosityStatus"
+              [textTop2]=""
+              [value]="luminosity"
+              [unit]="'lx'"
+              [progress]="luminosityProgress"
+            ></app-progress>
+          </div>
+        </div>
+        <div class="spec-spacer-2"></div>
+        <div class="spec-spacer-footer"></div>
+      </div>
+    </ion-slide>
+    <ion-slide>
+      <div class="container-page">
+        <div class="spec-spacer-header"></div>
+        <div class="spec-title-container">
+          <span class="title-text">토양습도</span>
+        </div>
+        <div class="spec-spacer-1"></div>
+        <div class="spec-container">
+          <div class="spec-container-inner">
+            <app-progress
+              [textTop1]="humidityStatus"
+              [textTop2]=""
+              [value]="humidity"
+              [unit]="'%'"
+              [progress]="humidityProgress"
+            ></app-progress>
+          </div>
+        </div>
+        <div class="spec-spacer-2"></div>
+        <div class="spec-spacer-footer"></div>
+      </div>
+    </ion-slide>
+    <ion-slide>
+      <div class="container-page">
+        <div class="spec-spacer-header"></div>
+        <div class="spec-title-container">
+          <span class="title-text">대기질</span>
+        </div>
+        <div class="spec-spacer-1"></div>
+        <div class="spec-container">
+          <div class="spec-container-inner">
+            <div class="spec-split-container">
+              <div class="left">
+                <app-progress
+                  [textTop1]="'CO²'"
+                  [textTop2]="co2Status"
+                  [value]="co2"
+                  [unit]=""
+                  [progress]="co2Progress"
+                ></app-progress>
+              </div>
+              <div class="right">
+                <app-progress
+                  [textTop1]="'미세먼지'"
+                  [textTop2]="dustStatus"
+                  [value]="dust"
+                  [unit]=""
+                  [progress]="dustProgress"
+                ></app-progress>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="spec-spacer-2"></div>
+        <div class="spec-spacer-footer"></div>
+      </div>
     </ion-slide>
   </ion-slides>
 
@@ -69,6 +157,55 @@
     <div class="section-center"></div>
     <div class="section-right">
       <img [src]="imgRight" class="navigation-arrow" (click)="slideNext()" />
+    </div>
+  </div>
+
+  <div id="slide-indicator-container">
+    <div id="slide-indicator-dot-container">
+      <img
+        *ngIf="showIndicatorDot"
+        [src]="indicatorDot"
+        class="indicator-icon"
+      />
+    </div>
+    <div id="slide-indicator">
+      <div class="slide-indicator-spacer"></div>
+
+      <div class="slide-indicator-slot">
+        <img *ngIf="indicator0" [src]="indicator0" class="indicator-icon" />
+      </div>
+      <div class="slide-indicator-slot">
+        <img *ngIf="indicator1" [src]="indicator1" class="indicator-icon" />
+      </div>
+      <div class="slide-indicator-slot">
+        <img *ngIf="indicator2" [src]="indicator2" class="indicator-icon" />
+      </div>
+      <div class="slide-indicator-slot">
+        <img *ngIf="indicator3" [src]="indicator3" class="indicator-icon" />
+      </div>
+      <div class="slide-indicator-slot">
+        <img *ngIf="indicator4" [src]="indicator4" class="indicator-icon" />
+      </div>
+      <div class="slide-indicator-slot">
+        <img *ngIf="indicator5" [src]="indicator5" class="indicator-icon" />
+      </div>
+      <div class="slide-indicator-slot">
+        <img *ngIf="indicator6" [src]="indicator6" class="indicator-icon" />
+      </div>
+      <div class="slide-indicator-slot">
+        <img *ngIf="indicator7" [src]="indicator7" class="indicator-icon" />
+      </div>
+      <div class="slide-indicator-slot">
+        <img *ngIf="indicator8" [src]="indicator8" class="indicator-icon" />
+      </div>
+      <div class="slide-indicator-slot">
+        <img *ngIf="indicator9" [src]="indicator9" class="indicator-icon" />
+      </div>
+      <div class="slide-indicator-slot">
+        <img *ngIf="indicator10" [src]="indicator10" class="indicator-icon" />
+      </div>
+
+      <div class="slide-indicator-spacer"></div>
     </div>
   </div>
 </ion-content>
