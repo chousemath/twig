@@ -5,17 +5,49 @@
     flex-direction: column;
     .progress-generic {
         width: 100%;
+        color: #fff;
         display: flex;
         justify-content: center;
         align-items: center;
     }
+    .flex-row {
+        display: flex;
+        flex-direction: row;
+    }
+    .flex-left-side {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+    .flex-right-side {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+    }
     .progress-top {
         @extend .progress-generic;
+        @extend .flex-row;
         height: 24px;
+        font-size: 20px;
     }
     .progress-mid {
         @extend .progress-generic;
+        @extend .flex-row;
         height: 98px;
+        .side {
+            flex: 1;
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-end;
+            font-size: 48px;
+            padding-top: 8px;
+        }
+        .center {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            font-size: 60px;
+        }
     }
     .progress-btm {
         @extend .progress-generic;
