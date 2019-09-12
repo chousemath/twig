@@ -1,6 +1,6 @@
 <ion-content>
-  <ion-slides style="width: 100vw; height: 100vh;" pager="false" [options]="slideOpts">
-    <ion-slide style="background-color: azure;">
+  <ion-slides #mainSlides class="bg-image no-scroll full-width" pager="false" [options]="slideOpts">
+    <ion-slide>
       <h1>Slide 1</h1>
     </ion-slide>
     <ion-slide>
@@ -8,6 +8,8 @@
     </ion-slide>
     <ion-slide>
       <h1>Slide 3</h1>
+      <p><ngb-progressbar type="success" [value]="25"></ngb-progressbar></p>
+
     </ion-slide>
     <ion-slide>
       <h1>Slide 4</h1>
@@ -21,9 +23,14 @@
   </ion-slides>
 
   <div id="slide-navigation-bar">
-    <div class="section-left"></div>
-    <div class="section-center"></div>
-    <div class="section-right"></div>
+    <div class="section-left">
+      <img [src]="imgLeft" class="navigation-arrow" (click)="slidePrev()" />
+    </div>
+    <div class="section-center">
+    </div>
+    <div class="section-right">
+      <img [src]="imgRight" class="navigation-arrow" (click)="slideNext()" />
+    </div>
   </div>
 
 </ion-content>
