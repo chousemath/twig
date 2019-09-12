@@ -1,5 +1,10 @@
 <ion-content>
-  <ion-slides #mainSlides class="bg-image no-scroll full-width" pager="false" [options]="slideOpts">
+  <ion-slides
+    #mainSlides
+    class="bg-image no-scroll full-width"
+    pager="false"
+    [options]="slideOpts"
+  >
     <ion-slide>
       <h1>Slide 1</h1>
     </ion-slide>
@@ -7,9 +12,17 @@
       <h1>Slide 2</h1>
     </ion-slide>
     <ion-slide>
-      <h1>Slide 3</h1>
-      <p><ngb-progressbar type="success" [value]="25"></ngb-progressbar></p>
-
+      <div class="spec-container">
+        <div class="spec-container-inner">
+          <app-progress
+          [textTop1]="'aaa'"
+          [textTop2]="'bbb'"
+          [value]="120"
+          [unit]="'lx'"
+          [progress]="45"
+          ></app-progress>
+        </div>
+      </div>
     </ion-slide>
     <ion-slide>
       <h1>Slide 4</h1>
@@ -26,11 +39,9 @@
     <div class="section-left">
       <img [src]="imgLeft" class="navigation-arrow" (click)="slidePrev()" />
     </div>
-    <div class="section-center">
-    </div>
+    <div class="section-center"></div>
     <div class="section-right">
       <img [src]="imgRight" class="navigation-arrow" (click)="slideNext()" />
     </div>
   </div>
-
 </ion-content>

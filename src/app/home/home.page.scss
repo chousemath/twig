@@ -11,6 +11,18 @@ $nav-icon: 45px;
   width: 100vw;
   height: 100vh;
 }
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.spec-container {
+  @extend .flex-center;
+  width: 100vw;
+  .spec-container-inner {
+    width: calc(100vw - 82px);
+  }
+}
 #slide-navigation-bar {
   width: 100vw; 
   height: $nav-height; 
@@ -23,9 +35,7 @@ $nav-icon: 45px;
   .section-generic {
     width: $nav-height;
     height: $nav-height;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    @extend .flex-center;
   }
   .section-left {
     @extend .section-generic;
