@@ -1,0 +1,57 @@
+.bg-image {
+  background: url("../../../assets/images/color-bg.jpg") no-repeat center center
+    fixed;
+  background-size: cover;
+}
+.no-scroll .scroll-content {
+  overflow: hidden;
+}
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.full-width {
+  @extend .flex-center;
+  width: 100vw;
+  height: 100vh;
+
+  $btn-height: 59px;
+  .button-container {
+    width: 187px;
+    height: $btn-height;
+    border-radius: 29px;
+    background-color: #fff;
+    display: flex;
+    flex-direction: row;
+
+    .icon-container {
+      width: $btn-height;
+      height: $btn-height;
+      @extend .flex-center;
+
+      .inner {
+        width: 47px;
+        height: 47px;
+        border-radius: 50%;
+        background-color: rgb(129, 202, 236);
+        @extend .flex-center;
+
+        .icon {
+            width: 33px;
+            height: 33px;
+        }
+      }
+    }
+
+    .text-container {
+        flex: 1;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        color: rgb(129, 202, 236);
+        font-size: 15px;
+        padding-left: 8px;
+    }
+  }
+}

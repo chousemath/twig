@@ -1,6 +1,8 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, OnInit } from '@angular/core';
 import { IonSlides } from '@ionic/angular';
 import { Subscription } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
+import { BluetoothLE, DeviceInfo, OperationResult, DescriptorParams, Device, Characteristic } from '@ionic-native/bluetooth-le/ngx';
 
 const defaultProgress = 50;
 enum SpecStatus {
@@ -22,7 +24,6 @@ const safeIcon = (i: number): string => {
   if (i >= 0 && i < iconLimit) {
     return icons[i];
   }
-  console.log(`hide: ${i}`);
   return '';
 };
 
@@ -31,7 +32,7 @@ const safeIcon = (i: number): string => {
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
 })
-export class HomePage {
+export class HomePage implements OnInit {
   @ViewChild(IonSlides, { static: false }) slides: IonSlides;
   public imgLeft = 'assets/images/navigate-left.png';
   public imgRight = 'assets/images/navigate-right.png';
@@ -90,10 +91,56 @@ export class HomePage {
 
   public name = '황금술통선인장';
   public subname = 'Golden Barrel';
+  private address: string;
 
-  constructor() {
+  private device$: Subscription;
+  private ops$: Subscription;
+
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    public bluetoothle: BluetoothLE,
+  ) {
     this.randomData();
     this.randInterval = setInterval(() => this.randomData(), 500);
+  }
+
+  ngOnInit() {
+    this.address = this.activatedRoute.snapshot.paramMap.get('address');
+    const addr: any = { address: this.address };
+    console.log(`from home page: ${this.address}`);
+    this.device$ = this.bluetoothle.connect(addr).subscribe((data: DeviceInfo) => {
+      console.log('==========DEVICE DATA=========');
+      console.log(data);
+      this.bluetoothle
+        .discover({ address: this.address, clearCache: true })
+        .then((resDiscover: Device) => {
+          console.log('==========DISCOVERY DATA=========');
+          console.log(resDiscover);
+          const serviceUUID = resDiscover.services[0].uuid;
+          const characteristicUUID = resDiscover
+            .services[0]
+            .characteristics
+            .filter((c: Characteristic) => c.properties && c.properties.notify)[0] // notify, write
+            .uuid;
+          console.log(`serviceUUID: ${serviceUUID}`);
+          console.log(`characteristicUUID: ${characteristicUUID}`);
+          const params: DescriptorParams = {
+            address: this.address,
+            characteristic: characteristicUUID,
+            service: serviceUUID,
+          };
+          this.ops$ = this.bluetoothle.subscribe(params).subscribe((ops: OperationResult) => {
+            console.log('==========Operation Result(2)=========');
+            console.log(ops);
+            if (ops.value) {
+              console.log(this.bluetoothle.stringToBytes(ops.value));
+            }
+          });
+        })
+        .catch(e => {
+          console.log(e);
+        });
+    });
   }
 
   ionViewDidEnter() {
@@ -102,10 +149,22 @@ export class HomePage {
     });
   }
 
-  ionViewWillLeave() {
+  async ionViewWillLeave() {
     clearInterval(this.randInterval);
     if (this.slideChange$) {
       this.slideChange$.unsubscribe();
+    }
+    if (this.device$) {
+      this.device$.unsubscribe();
+    }
+    const addr = { address: this.address };
+    if (await this.bluetoothle.isConnected(addr)) {
+      await this.bluetoothle.disconnect(addr);
+      await this.bluetoothle.close(addr);
+    }
+
+    if (this.ops$) {
+      this.ops$.unsubscribe();
     }
   }
 
@@ -113,7 +172,6 @@ export class HomePage {
     const i: number = await this.slides.getActiveIndex();
     this.showIndicatorDot = i !== 2;
 
-    console.log(i);
     this.indicator0 = safeIcon(i - 5);
     this.indicator1 = safeIcon(i - 4);
     this.indicator2 = safeIcon(i - 3);
