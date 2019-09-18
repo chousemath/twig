@@ -133,6 +133,8 @@ export class HomePage implements OnInit {
             console.log('==========Operation Result(2)=========');
             console.log(ops);
             if (ops.value) {
+              console.log('====VALUE======');
+              console.log(ops.value);
               console.log(this.bluetoothle.stringToBytes(ops.value));
             }
           });
@@ -214,3 +216,48 @@ export class HomePage implements OnInit {
     this.dustProgress = Math.round(100 * (this.dust / 200));
   }
 }
+
+
+
+
+
+
+
+
+// ngOnInit() {
+//   this.address = this.activatedRoute.snapshot.paramMap.get('address');
+//   const addr: any = { address: this.address };
+//   console.log(`from home page: ${this.address}`);
+//   this.device$ = this.bluetoothle.connect(addr).subscribe((data: DeviceInfo) => {
+//     console.log('==========DEVICE DATA=========');
+//     console.log(data);
+//     this.bluetoothle
+//       .discover({ address: this.address, clearCache: true })
+//       .then((resDiscover: Device) => {
+//         console.log('==========DISCOVERY DATA=========');
+//         console.log(resDiscover);
+//         const serviceUUID = resDiscover.services[0].uuid;
+//         const characteristic = resDiscover
+//           .services[0]
+//           .characteristics
+//           .filter((c: Characteristic) => c.properties && c.properties.notify)[0]; // notify, write
+//         // console.log(`serviceUUID: ${serviceUUID}`);
+//         // console.log(`characteristicUUID: ${characteristicUUID}`);
+//         const params: DescriptorParams = {
+//           address: resDiscover.address,
+//           characteristic: characteristic.descriptors[0].uuid,
+//           service: characteristic.uuid,
+//         };
+//         this.ops$ = this.bluetoothle.subscribe(params).subscribe((ops: OperationResult) => {
+//           console.log('==========Operation Result(2)=========');
+//           console.log(ops);
+//           if (ops.value) {
+//             console.log(this.bluetoothle.stringToBytes(ops.value));
+//           }
+//         });
+//       })
+//       .catch(e => {
+//         console.log(e);
+//       });
+//   });
+// }

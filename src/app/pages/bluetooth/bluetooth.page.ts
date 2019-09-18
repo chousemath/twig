@@ -3,7 +3,7 @@ import { NavController, Platform, AlertController, LoadingController, ActionShee
 import { BluetoothLE, ScanStatus } from '@ionic-native/bluetooth-le/ngx';
 import { Subscription } from 'rxjs';
 
-const loadingTime = 3000;
+const loadingTime = 10000;
 
 @Component({
   selector: 'app-bluetooth',
