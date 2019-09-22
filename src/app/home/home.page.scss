@@ -5,7 +5,8 @@ $indicator-height: 50px;
 $name-height: 75px;
 $footer-height: 35px;
 .bg-image {
-  background: url('../../assets/images/default-bg.jpg') no-repeat center center fixed;
+  background: url("../../assets/images/default-bg.jpg") no-repeat center center
+    fixed;
   background-size: cover;
 }
 .no-scroll .scroll-content {
@@ -32,6 +33,9 @@ $footer-height: 35px;
     height: 24px;
     font-size: 20px;
     color: #fff;
+    .title-text {
+      font-family: "AppleSDGothicNeoEB";
+    }
   }
   .spec-spacer-header {
     display: flex;
@@ -95,6 +99,9 @@ $footer-height: 35px;
       .upper-inner-left {
         height: 100%;
         @extend .flex-center;
+        .plant-name {
+          font-family: "AppleSDGothicNeoSB";
+        }
       }
       .upper-inner-right {
         width: 24px;
@@ -113,6 +120,9 @@ $footer-height: 35px;
     width: 100vw;
     height: 24px;
     font-size: 16px;
+    .plant-subname {
+      font-family: "AvenirNext-Regular";
+    }
   }
 }
 
@@ -153,10 +163,10 @@ $footer-height: 35px;
 }
 
 #slide-navigation-bar {
-  width: 100vw; 
-  height: $nav-height; 
-  position: fixed; 
-  top: calc(50vh - #{$nav-height}); 
+  width: 100vw;
+  height: $nav-height;
+  position: fixed;
+  top: calc(50vh - #{$nav-height});
   left: 0;
   z-index: 9999;
   display: flex;

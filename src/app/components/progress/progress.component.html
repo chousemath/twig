@@ -1,23 +1,23 @@
 <div class="container-progress">
   <div *ngIf="textTop1 && !textTop2" class="progress-top">
     <div class="flex-center">
-      <span>{{ textTop1 }}</span>
+      <span class="text-top-single">{{ textTop1 }}</span>
     </div>
   </div>
 
   <div *ngIf="textTop1 && textTop2" class="progress-top">
     <div class="flex-left-side">
-      <span>{{ textTop1 }}</span>
+      <span class="text-top-double-left">{{ textTop1 }}</span>
     </div>
     <div class="flex-right-side">
-      <span>{{ textTop2 }}</span>
+      <span class="text-top-double-right">{{ textTop2 }}</span>
     </div>
   </div>
 
   <div class="progress-mid">
     <div class="side"></div>
     <div class="center">
-      <span>{{ value }}</span>
+      <span class="value">{{ value }}</span>
     </div>
     <div class="side">
       <span *ngIf="unit">{{ unit }}</span>

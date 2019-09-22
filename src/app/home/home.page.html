@@ -154,14 +154,18 @@
     <div class="upper">
       <div class="upper-inner">
         <div class="upper-inner-left">
-            {{ name }}
+            <span class="plant-name">{{ name }}</span>
         </div>
         <div class="upper-inner-right">
           <img [src]="imgPencil" id="img-pencil" />
         </div>
       </div>
     </div>
-    <div class="lower">{{ subname }}</div>
+    <div class="lower">
+      <span class="plant-subname">
+        {{ subname }}
+      </span>
+    </div>
   </div>
 
   <div id="slide-navigation-bar">

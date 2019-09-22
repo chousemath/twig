@@ -16,7 +16,7 @@
 @import "~@ionic/angular/css/normalize.css";
 @import "~@ionic/angular/css/structure.css";
 @import "~@ionic/angular/css/typography.css";
-@import '~@ionic/angular/css/display.css';
+@import "~@ionic/angular/css/display.css";
 
 /* Optional CSS utils that can be commented out */
 @import "~@ionic/angular/css/padding.css";
@@ -24,3 +24,52 @@
 @import "~@ionic/angular/css/text-alignment.css";
 @import "~@ionic/angular/css/text-transformation.css";
 @import "~@ionic/angular/css/flex-utils.css";
+
+@font-face {
+  font-family: "AppleSDGothicNeoEB";
+  src: url("./assets/fonts/AppleSDGothicNeoEB.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "AppleSDGothicNeoR";
+  src: url("./assets/fonts/AppleSDGothicNeoR.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "AppleSDGothicNeoSB";
+  src: url("./assets/fonts/AppleSDGothicNeoSB.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "AppleSDGothicNeoUL";
+  src: url("./assets/fonts/AppleSDGothicNeoUL.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "AvenirNext-DemiBold";
+  src: url("./assets/fonts/AvenirNext-DemiBold.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "AvenirNext-Medium";
+  src: url("./assets/fonts/AvenirNext-Medium.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "AvenirNext-Regular";
+  src: url("./assets/fonts/AvenirNext-Regular.ttf");
+  font-weight: normal;
+  font-style: normal;
+}

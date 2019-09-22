@@ -1,66 +1,79 @@
 .container-progress {
+  width: 100%;
+  height: 133px;
+  display: flex;
+  flex-direction: column;
+  .progress-generic {
     width: 100%;
-    height: 133px;
+    color: #fff;
     display: flex;
-    flex-direction: column;
-    .progress-generic {
-        width: 100%;
-        color: #fff;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+    justify-content: center;
+    align-items: center;
+  }
+  .flex-row {
+    display: flex;
+    flex-direction: row;
+  }
+  .flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .flex-left-side {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .flex-right-side {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .progress-top {
+    @extend .progress-generic;
+    @extend .flex-row;
+    height: 24px;
+    font-size: 20px;
+    .text-top-single {
+      font-family: "AppleSDGothicNeoEB";
     }
-    .flex-row {
-        display: flex;
-        flex-direction: row;
+    .text-top-double-left {
+      font-family: "AppleSDGothicNeoUL";
     }
-    .flex-center {
-        display: flex;
-        justify-content: center;
-        align-items: center;
+    .text-top-double-right {
+      font-family: "AppleSDGothicNeoEB";
     }
-    .flex-left-side {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
+  }
+  .progress-mid {
+    @extend .progress-generic;
+    @extend .flex-row;
+    height: 98px;
+    .side {
+      flex: 1;
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-end;
+      font-size: 48px;
+      padding-top: 8px;
+      padding-left: 8px;
+      font-family: "AvenirNext-Medium";
     }
-    .flex-right-side {
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
+    .center {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      font-size: 60px;
+      .value {
+        font-family: "AvenirNext-DemiBold";
+      }
     }
-    .progress-top {
-        @extend .progress-generic;
-        @extend .flex-row;
-        height: 24px;
-        font-size: 20px;
-    }
-    .progress-mid {
-        @extend .progress-generic;
-        @extend .flex-row;
-        height: 98px;
-        .side {
-            flex: 1;
-            display: flex;
-            justify-content: flex-start;
-            align-items: flex-end;
-            font-size: 48px;
-            padding-top: 8px;
-            padding-left: 8px;
-        }
-        .center {
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            font-size: 60px;
-        }
-    }
-    .progress-btm {
-        @extend .progress-generic;
-        height: 11px;
-    }
-    .progress-bar-style {
-        width: 100%;
-        height: 100%;
-    }
+  }
+  .progress-btm {
+    @extend .progress-generic;
+    height: 11px;
+  }
+  .progress-bar-style {
+    width: 100%;
+    height: 100%;
+  }
 }
