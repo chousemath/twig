@@ -11,6 +11,58 @@ enum SpecStatus {
   Good = '좋음',
   Bad = '나쁨',
 }
+
+enum SpecLuminosity = {
+  Low = '부족',
+  OK = '적절',
+  High = '과다',
+};
+enum LimitLuminosity = {
+  OK = 100,
+  High = 2500,
+};
+
+enum SpecTemperature = {
+  Low = '저온',
+  OK = '적절',
+  High = '고온',
+};
+enum LimitTemperature = {
+  OK = 21,
+  High = 26,
+};
+
+enum SpecHumidity = {
+  Low = '건조',
+  OK = '적절',
+  High = '습함',
+};
+enum LimitHumidity = {
+  OK = 65,
+  High = 85,
+};
+
+enum SpecFertility = {
+  Low = '건조',
+  OK = '적절',
+  High = '과다',
+};
+enum LimitFertility = {
+  OK = 45,
+  High = 80,
+};
+
+const dataToSpecFertility = (value: number) => {
+  if (value < LimitFertility.OK.valueOf()) {
+    return SpecFertility.Low.valueOf();
+  } else if (value < LimitFertility.High.valueOf()) {
+    return SpecFertility.OK.valueOf();
+  }
+  return SpecFertility.High.valueOf();
+};
+const dataToSpec = (specType: string, data: number): string => {
+  // in progress...
+};
 const icons = [
   'assets/images/icon-fertility.png',
   'assets/images/icon-temperature.png',
