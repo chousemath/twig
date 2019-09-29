@@ -17,6 +17,15 @@ export class BluetoothPage implements OnInit {
   public clickable = false;
   private scanResults: Array<ScanStatus> = [];
   private scanAddresses = {};
+  private buttons: Array<any> = [
+    {
+      text: '닫기',
+      icon: 'close',
+      role: 'cancel',
+      handler: () => console.log('Cancel clicked'),
+    },
+  ];
+  private addressMap = {};
   constructor(
     private navCtrl: NavController,
     public bluetoothle: BluetoothLE,
@@ -82,41 +91,49 @@ export class BluetoothPage implements OnInit {
 
     const loading = await this.loadingCtrl.create({
       message: 'Scanning for BLE devices',
-      duration: loadingTime,
+      // duration: loadingTime,
     });
     await loading.present();
 
-    setTimeout(async () => {
-      if (this.startScan$) {
-        this.startScan$.unsubscribe();
-      }
-      if (await this.bluetoothle.isScanning()) {
-        await this.bluetoothle.stopScan();
-        this.scanResults = this.scanResults.filter((scanResult: ScanStatus) => scanResult.name);
-        const buttons: Array<any> = this.scanResults.map((scanResult: ScanStatus) => {
-          return {
-            text: scanResult.name,
-            icon: 'bluetooth',
-            handler: () => {
-              this.navCtrl.navigateRoot(`/home/${scanResult.address}`);
-            }
-          };
-        });
-        buttons.push({
-          text: '닫기',
-          icon: 'close',
-          role: 'cancel',
+    if (this.startScan$) {
+      this.startScan$.unsubscribe();
+    }
+    if (await this.bluetoothle.isScanning()) {
+      await this.bluetoothle.stopScan();
+      this.scanResults = this.scanResults.filter((scanResult: ScanStatus) => {
+        return scanResult.name && scanResult.name.toLowerCase().indexOf('uart') > -1;
+      });
+
+      const buttons: Array<any> = this.scanResults.map((scanResult: ScanStatus) => {
+        return {
+          text: scanResult.name,
+          address: scanResult.address,
+          icon: 'bluetooth',
           handler: () => {
-            console.log('Cancel clicked');
+            this.navCtrl.navigateRoot(`/home/${scanResult.address}`);
           }
-        });
+        };
+      });
+      buttons.forEach((button) => {
+        if (!this.addressMap[button.address]) {
+          this.addressMap[button.address] = true;
+          this.buttons.push(button);
+        }
+      });
+
+      if (this.buttons.length > 1) {
+        this.loadingCtrl.dismiss();
         const actionSheet = await this.actionSheetCtrl.create({
           header: 'BLE Devices',
-          buttons,
+          buttons: this.buttons,
         });
         await actionSheet.present();
       }
-    }, loadingTime);
+    }
+  }
+
+  public bypass() {
+    this.navCtrl.navigateRoot(`/home/x`);
   }
 
 }

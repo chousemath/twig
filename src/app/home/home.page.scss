@@ -37,6 +37,15 @@ $footer-height: 35px;
       font-family: "AppleSDGothicNeoEB";
     }
   }
+  .light-bulb-container {
+    @extend .flex-center;
+    width: 100vw;
+    height: 80px;
+    .light-bulb-icon {
+      width: 47px;
+      height: 47px;
+    }
+  }
   .spec-spacer-header {
     display: flex;
     width: 100vw;
@@ -136,8 +145,8 @@ $footer-height: 35px;
   display: flex;
   flex-direction: column;
   .indicator-icon {
-    width: 15px;
-    height: 15px;
+    width: 14px;
+    height: 14px;
   }
   #slide-indicator-dot-container {
     flex: 1;
@@ -187,7 +196,7 @@ $footer-height: 35px;
     @extend .section-generic;
   }
   .navigation-arrow {
-    width: $nav-icon;
+    // width: $nav-icon;
     height: $nav-icon;
     opacity: 0.7;
   }

@@ -1,8 +1,12 @@
 import { Component, ViewChild, OnInit } from '@angular/core';
-import { IonSlides } from '@ionic/angular';
+import { IonSlides, AlertController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { BluetoothLE, DeviceInfo, OperationResult, DescriptorParams, Device, Characteristic } from '@ionic-native/bluetooth-le/ngx';
+import { Storage } from '@ionic/storage';
+
+const keyName = 'twig-plant-name';
+const keySubname = 'twig-plant-subname';
 
 const defaultProgress = 50;
 enum SpecStatus {
@@ -12,64 +16,71 @@ enum SpecStatus {
   Bad = '나쁨',
 }
 
-enum SpecLuminosity = {
+enum SpecLuminosity {
   Low = '부족',
   OK = '적절',
   High = '과다',
-};
-enum LimitLuminosity = {
+}
+enum LimitLuminosity {
   OK = 100,
   High = 2500,
-};
+}
 
-enum SpecTemperature = {
+enum SpecTemperature {
   Low = '저온',
   OK = '적절',
   High = '고온',
-};
-enum LimitTemperature = {
+}
+enum LimitTemperature {
   OK = 21,
   High = 26,
-};
+}
 
-enum SpecHumidity = {
+enum SpecHumidity {
   Low = '건조',
   OK = '적절',
   High = '습함',
-};
-enum LimitHumidity = {
+}
+enum LimitHumidity {
   OK = 65,
   High = 85,
-};
+}
 
-enum SpecFertility = {
+enum SpecFertility {
   Low = '건조',
   OK = '적절',
   High = '과다',
-};
-enum LimitFertility = {
+}
+enum LimitFertility {
   OK = 45,
   High = 80,
+}
+
+const dataToSpec = (limit: any, spec: any, value: number) => {
+  if (value < limit.OK.valueOf()) {
+    return spec.Low.valueOf();
+  } else if (value < limit.High.valueOf()) {
+    return spec.OK.valueOf();
+  }
+  return spec.High.valueOf();
 };
 
-const dataToSpecFertility = (value: number) => {
-  if (value < LimitFertility.OK.valueOf()) {
-    return SpecFertility.Low.valueOf();
-  } else if (value < LimitFertility.High.valueOf()) {
-    return SpecFertility.OK.valueOf();
-  }
-  return SpecFertility.High.valueOf();
+const dataToSpecMap = {
+  fertility: (value: number) => dataToSpec(LimitFertility, SpecFertility, value),
+  temperature: (value: number) => dataToSpec(LimitTemperature, SpecTemperature, value),
+  luminosity: (value: number) => dataToSpec(LimitLuminosity, SpecLuminosity, value),
+  humidity: (value: number) => dataToSpec(LimitHumidity, SpecHumidity, value),
+  // dust: (value: number) => dataToSpec(LimitX, SpecX, value),
+  // current: (value: number) => dataToSpec(LimitCurrent, SpecX, value),
 };
-const dataToSpec = (specType: string, data: number): string => {
-  // in progress...
-};
+
 const icons = [
-  'assets/images/icon-fertility.png',
-  'assets/images/icon-temperature.png',
-  'assets/images/icon-current.png',
-  'assets/images/icon-luminosity.png',
-  'assets/images/icon-humidity.png',
-  'assets/images/icon-dust.png',
+  'assets/images/icon-fertility-on.png',
+  'assets/images/icon-temperature-on.png',
+  'assets/images/icon-current-on.png',
+  'assets/images/icon-luminosity-on.png',
+  'assets/images/icon-humidity-on.png',
+  'assets/images/icon-dust-on.png',
 ];
 const iconLimit = icons.length;
 const safeIcon = (i: number): string => {
@@ -89,6 +100,8 @@ export class HomePage implements OnInit {
   public imgLeft = 'assets/images/navigate-left.png';
   public imgRight = 'assets/images/navigate-right.png';
   public imgPencil = 'assets/images/icon-pencil.png';
+  public imgLight = 'assets/images/icon-light.png';
+  public lightOn = false;
   public slideOpts = {
     initialSlide: 2,
     speed: 400,
@@ -113,11 +126,11 @@ export class HomePage implements OnInit {
 
   public fertility = 0;
   public fertilityProgress = defaultProgress;
-  public fertilityStatus = SpecStatus.Appropriate.valueOf();
+  public fertilityStatus = SpecFertility.OK.valueOf();
 
   public temperature = 0;
   public temperatureProgress = defaultProgress;
-  public temperatureStatus = SpecStatus.Appropriate.valueOf();
+  public temperatureStatus = SpecTemperature.OK.valueOf();
 
   public currentStatus = 'Healthy';
   public currentTitle = '';
@@ -125,11 +138,11 @@ export class HomePage implements OnInit {
 
   public luminosity = 0;
   public luminosityProgress = defaultProgress;
-  public luminosityStatus = SpecStatus.Appropriate.valueOf();
+  public luminosityStatus = SpecLuminosity.OK.valueOf();
 
   public humidity = 0;
   public humidityProgress = defaultProgress;
-  public humidityStatus = SpecStatus.Appropriate.valueOf();
+  public humidityStatus = SpecHumidity.OK.valueOf();
 
   public co2 = 0;
   public co2Progress = defaultProgress;
@@ -141,8 +154,8 @@ export class HomePage implements OnInit {
 
   private slideChange$: Subscription;
 
-  public name = '황금술통선인장';
-  public subname = 'Golden Barrel';
+  public name = '';
+  public subname = '';
   private address: string;
 
   private device$: Subscription;
@@ -151,49 +164,47 @@ export class HomePage implements OnInit {
   constructor(
     private activatedRoute: ActivatedRoute,
     public bluetoothle: BluetoothLE,
+    public alertController: AlertController,
+    private storage: Storage,
   ) {
     this.randomData();
-    this.randInterval = setInterval(() => this.randomData(), 500);
+    this.randInterval = setInterval(() => this.randomData(), 1000);
   }
 
   ngOnInit() {
     this.address = this.activatedRoute.snapshot.paramMap.get('address');
     const addr: any = { address: this.address };
-    console.log(`from home page: ${this.address}`);
+    // if the address is x, that means that this app is just in UI/UX mode (no BLE connection)
+    if (addr === 'x') {
+      console.log('bluetooth connection has been bypassed');
+      return;
+    }
+
+    // DEVICE DATA
     this.device$ = this.bluetoothle.connect(addr).subscribe((data: DeviceInfo) => {
-      console.log('==========DEVICE DATA=========');
-      console.log(data);
       this.bluetoothle
         .discover({ address: this.address, clearCache: true })
-        .then((resDiscover: Device) => {
-          console.log('==========DISCOVERY DATA=========');
-          console.log(resDiscover);
+        .then((resDiscover: Device) => { // DISCOVERY DATA
           const serviceUUID = resDiscover.services[0].uuid;
           const characteristicUUID = resDiscover
             .services[0]
             .characteristics
             .filter((c: Characteristic) => c.properties && c.properties.notify)[0] // notify, write
             .uuid;
-          console.log(`serviceUUID: ${serviceUUID}`);
-          console.log(`characteristicUUID: ${characteristicUUID}`);
           const params: DescriptorParams = {
             address: this.address,
             characteristic: characteristicUUID,
             service: serviceUUID,
           };
+          // Operation Result
           this.ops$ = this.bluetoothle.subscribe(params).subscribe((ops: OperationResult) => {
-            console.log('==========Operation Result(2)=========');
-            console.log(ops);
+            // VALUE: actual data from BLE device (in base64 encoding)
             if (ops.value) {
-              console.log('====VALUE======');
               console.log(ops.value);
-              console.log(this.bluetoothle.stringToBytes(ops.value));
             }
           });
         })
-        .catch(e => {
-          console.log(e);
-        });
+        .catch(e => console.log(e));
     });
   }
 
@@ -201,6 +212,13 @@ export class HomePage implements OnInit {
     this.slideChange$ = this.slides.ionSlideDidChange.subscribe(() => {
       this.ionSlideDidChange();
     });
+  }
+
+  async ionViewWillEnter() {
+    const nameVal = await this.storage.get(keyName);
+    this.name = nameVal ? nameVal : '황금술통선인장';
+    const subnameVal = await this.storage.get(keySubname);
+    this.subname = subnameVal ? subnameVal : 'Golden Barrel';
   }
 
   async ionViewWillLeave() {
@@ -246,20 +264,72 @@ export class HomePage implements OnInit {
     this.slides.slideNext();
   }
 
-  private randomData() {
-    this.fertility = Math.round(Math.random() * 100);
-    this.fertilityProgress = this.fertility;
+  public async presentAlertPrompt() {
+    const alert = await this.alertController.create({
+      header: '이름',
+      inputs: [
+        {
+          label: '이름',
+          name: 'name',
+          type: 'text',
+          value: this.name,
+          placeholder: '황금술통선인장',
+        },
+        {
+          label: '제목',
+          name: 'subname',
+          type: 'text',
+          value: this.subname,
+          placeholder: 'Golden Barrel',
+        },
+      ],
+      buttons: [
+        {
+          text: '취소',
+          role: 'cancel',
+          cssClass: 'secondary',
+          handler: () => {
+            console.log('Confirm Cancel');
+          },
+        }, {
+          text: '확인',
+          role: 'confirm',
+          handler: () => {
+            console.log('Confirm Ok');
+          },
+        }
+      ]
+    });
+    alert.onDidDismiss().then(data => {
+      console.log(data);
+      if (data.role === 'confirm') {
+        this.storage.set(keyName, data.data.values.name);
+        this.storage.set(keySubname, data.data.values.subname);
+        this.name = data.data.values.name;
+        this.subname = data.data.values.subname;
+      }
+    }).catch(e => console.log(e));
+    await alert.present();
+  }
 
-    this.temperature = 20 + Math.round(Math.random() * 20);
-    this.temperatureProgress = this.temperature;
+  private randomData() {
+    this.fertility = Math.round(Math.random() * (LimitFertility.High.valueOf() + LimitFertility.OK.valueOf()));
+    this.fertilityProgress = this.fertility / (LimitFertility.High.valueOf() + LimitFertility.OK.valueOf());
+    this.fertilityStatus = dataToSpecMap.fertility(this.fertility);
+
+    this.temperature = Math.round(Math.random() * (LimitTemperature.High.valueOf() + LimitTemperature.OK.valueOf()));
+    this.temperatureProgress = this.temperature / (LimitTemperature.High.valueOf() + LimitTemperature.OK.valueOf());
+    this.temperatureStatus = dataToSpecMap.temperature(this.temperature);
 
     this.currentProgress = Math.round(Math.random() * 100);
 
-    this.luminosity = 100 + Math.round(Math.random() * 100);
-    this.luminosityProgress = Math.round(100 * (this.luminosity / 200));
+    this.luminosity = Math.round(Math.random() * (LimitLuminosity.High.valueOf() + LimitLuminosity.OK.valueOf()));
+    this.luminosityProgress = this.luminosity / (LimitLuminosity.High.valueOf() + LimitLuminosity.OK.valueOf());
+    this.luminosityStatus = dataToSpecMap.luminosity(this.luminosity);
 
-    this.humidity = Math.round(Math.random() * 100);
-    this.humidityProgress = this.humidity;
+    this.humidity = Math.round(Math.random() * (LimitHumidity.High.valueOf() + LimitHumidity.OK.valueOf()));
+    this.humidityProgress = this.humidity / (LimitHumidity.High.valueOf() + LimitHumidity.OK.valueOf());
+    this.humidityStatus = dataToSpecMap.humidity(this.humidity);
 
     this.co2 = 100 + Math.round(Math.random() * 100);
     this.co2Progress = Math.round(100 * (this.co2 / 200));
@@ -267,49 +337,13 @@ export class HomePage implements OnInit {
     this.dust = 100 + Math.round(Math.random() * 100);
     this.dustProgress = Math.round(100 * (this.dust / 200));
   }
+
+  toggleLight() {
+    this.lightOn = !this.lightOn;
+    if (this.lightOn) {
+      this.imgLight = 'assets/images/icon-light-on.png';
+    } else {
+      this.imgLight = 'assets/images/icon-light.png';
+    }
+  }
 }
-
-
-
-
-
-
-
-
-// ngOnInit() {
-//   this.address = this.activatedRoute.snapshot.paramMap.get('address');
-//   const addr: any = { address: this.address };
-//   console.log(`from home page: ${this.address}`);
-//   this.device$ = this.bluetoothle.connect(addr).subscribe((data: DeviceInfo) => {
-//     console.log('==========DEVICE DATA=========');
-//     console.log(data);
-//     this.bluetoothle
-//       .discover({ address: this.address, clearCache: true })
-//       .then((resDiscover: Device) => {
-//         console.log('==========DISCOVERY DATA=========');
-//         console.log(resDiscover);
-//         const serviceUUID = resDiscover.services[0].uuid;
-//         const characteristic = resDiscover
-//           .services[0]
-//           .characteristics
-//           .filter((c: Characteristic) => c.properties && c.properties.notify)[0]; // notify, write
-//         // console.log(`serviceUUID: ${serviceUUID}`);
-//         // console.log(`characteristicUUID: ${characteristicUUID}`);
-//         const params: DescriptorParams = {
-//           address: resDiscover.address,
-//           characteristic: characteristic.descriptors[0].uuid,
-//           service: characteristic.uuid,
-//         };
-//         this.ops$ = this.bluetoothle.subscribe(params).subscribe((ops: OperationResult) => {
-//           console.log('==========Operation Result(2)=========');
-//           console.log(ops);
-//           if (ops.value) {
-//             console.log(this.bluetoothle.stringToBytes(ops.value));
-//           }
-//         });
-//       })
-//       .catch(e => {
-//         console.log(e);
-//       });
-//   });
-// }

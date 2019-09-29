@@ -75,6 +75,9 @@
         <div class="spec-title-container">
           <span class="title-text">화분조도</span>
         </div>
+        <div class="light-bulb-container">
+          <img [src]="imgLight" class="light-bulb-icon" (click)="toggleLight()" />
+        </div>
         <div class="spec-spacer-1"></div>
         <div class="spec-container">
           <div class="spec-container-inner">
@@ -157,7 +160,7 @@
             <span class="plant-name">{{ name }}</span>
         </div>
         <div class="upper-inner-right">
-          <img [src]="imgPencil" id="img-pencil" />
+          <img [src]="imgPencil" id="img-pencil" (click)="presentAlertPrompt()" />
         </div>
       </div>
     </div>
