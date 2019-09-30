@@ -11,13 +11,16 @@ const loadingTime = 10000;
   styleUrls: ['./bluetooth.page.scss'],
 })
 export class BluetoothPage implements OnInit {
+  // declare static asset paths here
   public imgBluetooth = 'assets/images/icon-bluetooth.png';
+
   private ble$: Subscription;
   private startScan$: Subscription;
   public clickable = false;
   private scanResults: Array<ScanStatus> = [];
   private scanAddresses = {};
   private buttons: Array<any> = [
+    // the default cancel button for bluetooth device selector menu
     {
       text: '닫기',
       icon: 'close',
@@ -39,9 +42,8 @@ export class BluetoothPage implements OnInit {
   }
 
   ionViewDidEnter() {
-    console.log('bluetooth page ready');
     this.plt.ready().then((readySource) => {
-      console.log('Platform ready from', readySource);
+      // check to make sure bluetooth is enabled here
       this.ble$ = this.bluetoothle.initialize().subscribe(async (ble) => {
         this.clickable = ble.status.toLowerCase() === 'enabled';
         if (!this.clickable) {
@@ -51,6 +53,7 @@ export class BluetoothPage implements OnInit {
     });
   }
 
+  // convenience method for alerting the user that bluetooth is not on
   private async alertBLE() {
     const alert = await this.alertCtrl.create({
       header: 'Bluetooth unavailable',
@@ -61,6 +64,7 @@ export class BluetoothPage implements OnInit {
     await alert.present();
   }
 
+  // clean up any long-lived subscriptions here
   async ionViewWillLeave() {
     if (this.ble$) {
       this.ble$.unsubscribe();
@@ -73,6 +77,7 @@ export class BluetoothPage implements OnInit {
     }
   }
 
+  // attempt bluetooth device scan
   public async tryPairing() {
     if (!this.clickable) {
       await this.alertBLE();
@@ -132,6 +137,7 @@ export class BluetoothPage implements OnInit {
     }
   }
 
+  // this is just for testing purposes, remove before going into production
   public bypass() {
     this.navCtrl.navigateRoot(`/home/x`);
   }
