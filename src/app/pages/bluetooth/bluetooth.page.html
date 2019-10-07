@@ -1,13 +1,20 @@
 <ion-content>
   <div class="bg-image no-scroll full-width">
-    <div class="button-container" (click)="bypass()">
-      <div class="icon-container">
-        <div class="inner">
-          <img [src]="imgBluetooth" class="icon" />
-        </div>
+    <div class="center-section">
+      <div class="center-section-upper">
+        <img src="/assets/images/logo.png" class="logo-styling" />
       </div>
-      <div class="text-container">
-        블루투스 페어링
+      <div class="center-section-lower">
+        <div class="button-container" (click)="bypass()">
+          <div class="icon-container">
+            <div class="inner">
+              <img [src]="imgBluetooth" class="icon" />
+            </div>
+          </div>
+          <div class="text-container">
+            블루투스 페어링
+          </div>
+        </div>
       </div>
     </div>
   </div>

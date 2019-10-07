@@ -145,8 +145,8 @@ $footer-height: 35px;
   display: flex;
   flex-direction: column;
   .indicator-icon {
-    width: 14px;
-    height: 14px;
+    width: 20px;
+    height: 20px;
   }
   #slide-indicator-dot-container {
     flex: 1;
@@ -165,8 +165,17 @@ $footer-height: 35px;
     }
     .slide-indicator-slot {
       @extend .flex-center;
-      width: 30px;
+      width: 50px;
       height: 100%;
+
+      .indicator-active {
+        opacity: 1;
+        width: 24px;
+        height: 24px;
+      }
+      .indicator-inactive {
+        opacity: 0.4;
+      }
     }
   }
 }

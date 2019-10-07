@@ -5,6 +5,9 @@ import { ActivatedRoute } from '@angular/router';
 import { BluetoothLE, DeviceInfo, OperationResult, DescriptorParams, Device, Characteristic } from '@ionic-native/bluetooth-le/ngx';
 import { Storage } from '@ionic/storage';
 
+// circumvent typescript compiler error
+declare const Buffer;
+
 // namespace for plant-related info starts with "twig-plant-"
 const keyName = 'twig-plant-name';
 const keySubname = 'twig-plant-subname';
@@ -87,7 +90,7 @@ const icons = [
   'assets/images/icon-current-on.png',
   'assets/images/icon-luminosity-on.png',
   'assets/images/icon-humidity-on.png',
-  'assets/images/icon-dust-on.png',
+  // 'assets/images/icon-dust-on.png',
 ];
 const iconLimit = icons.length;
 // helper function to make sure the navigator does not crash the app
@@ -117,6 +120,7 @@ export class HomePage implements OnInit {
     initialSlide: 2,
     speed: 400,
   };
+  public currentSlide = 2;
 
   public showIndicatorDot = false;
   public indicatorDot = icons[2];
@@ -130,9 +134,9 @@ export class HomePage implements OnInit {
   public indicator5 = icons[2];
   public indicator6 = icons[3];
   public indicator7 = icons[4];
-  public indicator8 = icons[5];
+  // public indicator8 = icons[5];
+  public indicator8 = '';
   public indicator9 = '';
-  public indicator10 = '';
 
   // remove this before going into production
   private randInterval: any;
@@ -294,6 +298,7 @@ export class HomePage implements OnInit {
   // control slider icon change here
   private async ionSlideDidChange() {
     const i: number = await this.slides.getActiveIndex();
+    this.currentSlide = i;
     this.showIndicatorDot = i !== 2;
 
     this.indicator0 = safeIcon(i - 5);
@@ -306,7 +311,6 @@ export class HomePage implements OnInit {
     this.indicator7 = safeIcon(i + 2);
     this.indicator8 = safeIcon(i + 3);
     this.indicator9 = safeIcon(i + 4);
-    this.indicator10 = safeIcon(i + 5);
   }
 
   public slidePrev() {
@@ -369,28 +373,28 @@ export class HomePage implements OnInit {
   // this is just for testing purposes, remove before going into production
   private randomData() {
     this.fertility = Math.round(Math.random() * (LimitFertility.High.valueOf() + LimitFertility.OK.valueOf()));
-    this.fertilityProgress = this.fertility / (LimitFertility.High.valueOf() + LimitFertility.OK.valueOf());
+    this.fertilityProgress = 100 * this.fertility / (LimitFertility.High.valueOf() + LimitFertility.OK.valueOf());
     this.fertilityStatus = dataToSpecMap.fertility(this.fertility);
 
     this.temperature = Math.round(Math.random() * (LimitTemperature.High.valueOf() + LimitTemperature.OK.valueOf()));
-    this.temperatureProgress = this.temperature / (LimitTemperature.High.valueOf() + LimitTemperature.OK.valueOf());
+    this.temperatureProgress = 100 * this.temperature / (LimitTemperature.High.valueOf() + LimitTemperature.OK.valueOf());
     this.temperatureStatus = dataToSpecMap.temperature(this.temperature);
 
     this.currentProgress = Math.round(Math.random() * 100);
 
     this.luminosity = Math.round(Math.random() * (LimitLuminosity.High.valueOf() + LimitLuminosity.OK.valueOf()));
-    this.luminosityProgress = this.luminosity / (LimitLuminosity.High.valueOf() + LimitLuminosity.OK.valueOf());
+    this.luminosityProgress = 100 * this.luminosity / (LimitLuminosity.High.valueOf() + LimitLuminosity.OK.valueOf());
     this.luminosityStatus = dataToSpecMap.luminosity(this.luminosity);
 
     this.humidity = Math.round(Math.random() * (LimitHumidity.High.valueOf() + LimitHumidity.OK.valueOf()));
-    this.humidityProgress = this.humidity / (LimitHumidity.High.valueOf() + LimitHumidity.OK.valueOf());
+    this.humidityProgress = 100 * this.humidity / (LimitHumidity.High.valueOf() + LimitHumidity.OK.valueOf());
     this.humidityStatus = dataToSpecMap.humidity(this.humidity);
 
-    this.co2 = 100 + Math.round(Math.random() * 100);
-    this.co2Progress = Math.round(100 * (this.co2 / 200));
+    // this.co2 = 100 + Math.round(Math.random() * 100);
+    // this.co2Progress = Math.round(100 * (this.co2 / 200));
 
-    this.dust = 100 + Math.round(Math.random() * 100);
-    this.dustProgress = Math.round(100 * (this.dust / 200));
+    // this.dust = 100 + Math.round(Math.random() * 100);
+    // this.dustProgress = Math.round(100 * (this.dust / 200));
   }
 
   // bluetooth data write command should go in this function

@@ -76,7 +76,11 @@
           <span class="title-text">화분조도</span>
         </div>
         <div class="light-bulb-container">
-          <img [src]="imgLight" class="light-bulb-icon" (click)="toggleLight()" />
+          <img
+            [src]="imgLight"
+            class="light-bulb-icon"
+            (click)="toggleLight()"
+          />
         </div>
         <div class="spec-spacer-1"></div>
         <div class="spec-container">
@@ -116,7 +120,7 @@
         <div class="spec-spacer-footer"></div>
       </div>
     </ion-slide>
-    <ion-slide>
+    <!-- <ion-slide>
       <div class="container-page">
         <div class="spec-spacer-header"></div>
         <div class="spec-title-container">
@@ -150,17 +154,21 @@
         <div class="spec-spacer-2"></div>
         <div class="spec-spacer-footer"></div>
       </div>
-    </ion-slide>
+    </ion-slide> -->
   </ion-slides>
 
   <div id="name-container">
     <div class="upper">
       <div class="upper-inner">
         <div class="upper-inner-left">
-            <span class="plant-name">{{ name }}</span>
+          <span class="plant-name">{{ name }}</span>
         </div>
         <div class="upper-inner-right">
-          <img [src]="imgPencil" id="img-pencil" (click)="presentAlertPrompt()" />
+          <img
+            [src]="imgPencil"
+            id="img-pencil"
+            (click)="presentAlertPrompt()"
+          />
         </div>
       </div>
     </div>
@@ -186,46 +194,44 @@
       <img
         *ngIf="showIndicatorDot"
         [src]="indicatorDot"
-        class="indicator-icon"
+        class="indicator-icon indicator-inactive"
       />
     </div>
     <div id="slide-indicator">
       <div class="slide-indicator-spacer"></div>
+      <!-- <div class="slide-indicator-spacer"></div> -->
 
       <div class="slide-indicator-slot">
-        <img *ngIf="indicator0" [src]="indicator0" class="indicator-icon" />
+        <img *ngIf="indicator0" [src]="indicator0" class="indicator-icon indicator-inactive" />
       </div>
       <div class="slide-indicator-slot">
-        <img *ngIf="indicator1" [src]="indicator1" class="indicator-icon" />
+        <img *ngIf="indicator1" [src]="indicator1" class="indicator-icon indicator-inactive" />
       </div>
       <div class="slide-indicator-slot">
-        <img *ngIf="indicator2" [src]="indicator2" class="indicator-icon" />
+        <img *ngIf="indicator2" [src]="indicator2" class="indicator-icon indicator-inactive" />
       </div>
       <div class="slide-indicator-slot">
-        <img *ngIf="indicator3" [src]="indicator3" class="indicator-icon" />
+        <img *ngIf="indicator3" [src]="indicator3" class="indicator-icon indicator-inactive" />
       </div>
       <div class="slide-indicator-slot">
-        <img *ngIf="indicator4" [src]="indicator4" class="indicator-icon" />
+        <img *ngIf="indicator4" [src]="indicator4" class="indicator-icon indicator-inactive" />
       </div>
       <div class="slide-indicator-slot">
-        <img *ngIf="indicator5" [src]="indicator5" class="indicator-icon" />
+        <img *ngIf="indicator5" [src]="indicator5" class="indicator-icon indicator-active" />
       </div>
       <div class="slide-indicator-slot">
-        <img *ngIf="indicator6" [src]="indicator6" class="indicator-icon" />
+        <img *ngIf="indicator6" [src]="indicator6" class="indicator-icon indicator-inactive" />
       </div>
       <div class="slide-indicator-slot">
-        <img *ngIf="indicator7" [src]="indicator7" class="indicator-icon" />
+        <img *ngIf="indicator7" [src]="indicator7" class="indicator-icon indicator-inactive" />
       </div>
       <div class="slide-indicator-slot">
-        <img *ngIf="indicator8" [src]="indicator8" class="indicator-icon" />
+        <img *ngIf="indicator8" [src]="indicator8" class="indicator-icon indicator-inactive" />
       </div>
       <div class="slide-indicator-slot">
-        <img *ngIf="indicator9" [src]="indicator9" class="indicator-icon" />
+        <img *ngIf="indicator9" [src]="indicator9" class="indicator-icon indicator-inactive" />
       </div>
-      <div class="slide-indicator-slot">
-        <img *ngIf="indicator10" [src]="indicator10" class="indicator-icon" />
-      </div>
-
+      <div class="slide-indicator-slot"></div>
       <div class="slide-indicator-spacer"></div>
     </div>
   </div>
