@@ -3,7 +3,7 @@ import { NavController, Platform, AlertController, LoadingController, ActionShee
 import { BluetoothLE, ScanStatus } from '@ionic-native/bluetooth-le/ngx';
 import { Subscription } from 'rxjs';
 
-const loadingTime = 10000;
+const deviceName = 'flowerpot';
 
 @Component({
   selector: 'app-bluetooth',
@@ -78,7 +78,7 @@ export class BluetoothPage implements OnInit {
   }
 
   // attempt bluetooth device scan
-  public async tryPairing() {
+  public async attemptBluetoothPairing() {
     if (!this.clickable) {
       await this.alertBLE();
       return;
@@ -87,54 +87,23 @@ export class BluetoothPage implements OnInit {
     if (this.startScan$) {
       this.startScan$.unsubscribe();
     }
-    this.startScan$ = this.bluetoothle.startScan({}).subscribe((res: ScanStatus) => {
-      if (res.status === 'scanResult' && !this.scanAddresses[res.address]) {
-        this.scanResults.push(res);
-        this.scanAddresses[res.address] = true;
-      }
-    });
-
     const loading = await this.loadingCtrl.create({
       message: 'Scanning for BLE devices',
-      // duration: loadingTime,
     });
     await loading.present();
-
-    if (this.startScan$) {
-      this.startScan$.unsubscribe();
-    }
-    if (await this.bluetoothle.isScanning()) {
-      await this.bluetoothle.stopScan();
-      this.scanResults = this.scanResults.filter((scanResult: ScanStatus) => {
-        return scanResult.name && scanResult.name.toLowerCase().indexOf('uart') > -1;
-      });
-
-      const buttons: Array<any> = this.scanResults.map((scanResult: ScanStatus) => {
-        return {
-          text: scanResult.name,
-          address: scanResult.address,
-          icon: 'bluetooth',
-          handler: () => {
-            this.navCtrl.navigateRoot(`/home/${scanResult.address}`);
-          }
-        };
-      });
-      buttons.forEach((button) => {
-        if (!this.addressMap[button.address]) {
-          this.addressMap[button.address] = true;
-          this.buttons.push(button);
+    this.startScan$ = this.bluetoothle.startScan({}).subscribe(async (res: ScanStatus) => {
+      console.log('\n\n=============');
+      console.log('scan name:', res.name);
+      console.log('scan status:', res.status);
+      console.log('scan address:', res.address);
+      console.log('=============\n\n');
+      if (res.status === 'scanResult') {
+        if (res.name.toLowerCase() === deviceName) {
+          this.loadingCtrl.dismiss();
+          this.navCtrl.navigateRoot(`/home/${res.address}`);
         }
-      });
-
-      if (this.buttons.length > 1) {
-        this.loadingCtrl.dismiss();
-        const actionSheet = await this.actionSheetCtrl.create({
-          header: 'BLE Devices',
-          buttons: this.buttons,
-        });
-        await actionSheet.present();
       }
-    }
+    });
   }
 
   // this is just for testing purposes, remove before going into production

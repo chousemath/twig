@@ -2,7 +2,7 @@ import { Component, ViewChild, OnInit } from '@angular/core';
 import { IonSlides, AlertController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
-import { BluetoothLE, DeviceInfo, OperationResult, DescriptorParams, Device, Characteristic } from '@ionic-native/bluetooth-le/ngx';
+import { BluetoothLE, DeviceInfo, OperationResult, DescriptorParams, Device } from '@ionic-native/bluetooth-le/ngx';
 import { Storage } from '@ionic/storage';
 
 // circumvent typescript compiler error
@@ -179,12 +179,6 @@ export class HomePage implements OnInit {
   private device$: Subscription;
   private ops$: Subscription;
 
-  private writeParams: DescriptorParams = {
-    address: '',
-    characteristic: '',
-    service: '',
-  };
-
   constructor(
     private activatedRoute: ActivatedRoute,
     public bluetoothle: BluetoothLE,
@@ -211,31 +205,18 @@ export class HomePage implements OnInit {
         clearCache = true / false (default) Force the device to re-discover services,
         instead of relying on cache from previous discovery (Android only)
       */
+      console.log('\nDeviceInfo:');
+      console.log(data);
       this.bluetoothle
         .discover({ address: this.address, clearCache: true })
         .then((resDiscover: Device) => { // DISCOVERY DATA
-          // The service's UUID
-          const serviceUUID = resDiscover.services[0].uuid;
-          // notify data stream characteristic's UUID
-          const characteristicUUID = resDiscover
-            .services[0]
-            .characteristics
-            .filter((c: Characteristic) => c.properties && c.properties.notify)[0] // notify, write
-            .uuid;
-
-          this.writeParams.address = this.address; // The address provided by the scan's return object
-          this.writeParams.service = resDiscover.services[0].uuid; // The service's UUID
-          // write data stream characteristic's UUID
-          this.writeParams.characteristic = resDiscover
-            .services[0]
-            .characteristics
-            .filter((c: Characteristic) => c.properties && c.properties.write)[0] // notify, write
-            .uuid;
-
+          console.log('\nDevice:');
+          console.log(resDiscover);
           const params: DescriptorParams = {
             address: this.address,
-            characteristic: characteristicUUID,
-            service: serviceUUID,
+            // characteristic: '00002A76-0000-1000-8000-00805F9B34FB',
+            characteristic: 'BEB5483E-0000-1000-8000-00805F9B34FB',
+            service: '0000181C-0000-1000-8000-00805F9B34FB',
           };
           /* Subscribe to a particular service's characteristic.
              Once a subscription is no longer needed, execute unsubscribe in a similar fashion.
@@ -243,10 +224,14 @@ export class HomePage implements OnInit {
              notification/indication based on the characteristic's properties.
           */
           this.ops$ = this.bluetoothle.subscribe(params).subscribe((ops: OperationResult) => {
+            // console.log('\nOperationResult:');
+            // console.log(ops);
             // VALUE: actual data from BLE device (in base64 encoding)
             if (ops.value) {
+              console.log('value 1:', ops.value);
+              console.log('value 2:', this.bluetoothle.encodedStringToBytes(ops.value));
               // convert Base64 data into useable data for UI
-              this.processData(ops.value);
+              // this.processData(ops.value);
             }
           });
         })
