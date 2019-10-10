@@ -2,13 +2,19 @@ import { Component, ViewChild, OnInit } from '@angular/core';
 import { IonSlides, AlertController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
-import { BluetoothLE, DeviceInfo, OperationResult, DescriptorParams, Device } from '@ionic-native/bluetooth-le/ngx';
+import { SplashScreen } from '@ionic-native/splash-screen/ngx';
+import {
+  BluetoothLE, DeviceInfo, OperationResult, DescriptorParams, Device,
+  WriteCharacteristicParams
+} from '@ionic-native/bluetooth-le/ngx';
 import { Storage } from '@ionic/storage';
 import { Buffer } from 'buffer';
+import * as _ from 'lodash';
 
 // namespace for plant-related info starts with "twig-plant-"
 const keyName = 'twig-plant-name';
 const keySubname = 'twig-plant-subname';
+const fertilityLimit = 10000;
 
 const defaultProgress = 50;
 enum SpecStatus {
@@ -106,11 +112,13 @@ const safeIcon = (i: number): string => {
 })
 export class HomePage implements OnInit {
   @ViewChild(IonSlides, { static: false }) slides: IonSlides;
+
+  private writeParams: WriteCharacteristicParams;
+
   // declare static asset paths here
   public imgLeft = 'assets/images/navigate-left.png';
   public imgRight = 'assets/images/navigate-right.png';
   public imgPencil = 'assets/images/icon-pencil.png';
-  public imgLight = 'assets/images/icon-light.png';
   public lightOn = false;
 
   // used in the .html file in the slider
@@ -182,6 +190,7 @@ export class HomePage implements OnInit {
     public bluetoothle: BluetoothLE,
     public alertController: AlertController,
     private storage: Storage,
+    private splashScreen: SplashScreen,
   ) {
     // this.randomData();
     // this.randInterval = setInterval(() => this.randomData(), 1000);
@@ -203,30 +212,57 @@ export class HomePage implements OnInit {
         clearCache = true / false (default) Force the device to re-discover services,
         instead of relying on cache from previous discovery (Android only)
       */
-      console.log('\nDeviceInfo:');
+      console.log('\nDeviceInfo:\n');
       console.log(data);
       this.bluetoothle
         .discover({ address: this.address, clearCache: true })
         .then((resDiscover: Device) => { // DISCOVERY DATA
-          console.log('\nDevice:');
+          console.log('\nDevice:\n');
           console.log(resDiscover);
-          const params: DescriptorParams = {
+
+          console.log('getting the props');
+          const props: Array<any> = _.flatten(resDiscover.services.map(serv => {
+            return serv.characteristics.map(ch => {
+              return Object.assign(ch.properties, {
+                serviceUUID: serv.uuid,
+                characteristicUUID: ch.uuid,
+              });
+            });
+          }));
+          console.log(props);
+
+          const readData = props.filter(p => p.notify && p.read)[0];
+          console.log('readData:', readData);
+
+          const readParams: DescriptorParams = {
             address: this.address,
-            // characteristic: '00002A76-0000-1000-8000-00805F9B34FB',
-            characteristic: 'BEB5483E-0000-1000-8000-00805F9B34FB',
-            service: '0000181C-0000-1000-8000-00805F9B34FB',
+            characteristic: readData.characteristicUUID,
+            service: readData.serviceUUID,
           };
+          console.log('readParams:', readParams);
+
+          const writeData = props.filter(p => p.write && p.read)[0];
+          console.log('writeData:', writeData);
+          this.writeParams = {
+            address: this.address,
+            characteristic: writeData.characteristicUUID,
+            service: writeData.serviceUUID,
+            value: '0',
+          };
+          console.log('this.writeParams:', this.writeParams);
           /* Subscribe to a particular service's characteristic.
              Once a subscription is no longer needed, execute unsubscribe in a similar fashion.
              The Client Configuration descriptor will automatically be written to enable
              notification/indication based on the characteristic's properties.
           */
-          this.ops$ = this.bluetoothle.subscribe(params).subscribe((ops: OperationResult) => {
+          this.ops$ = this.bluetoothle.subscribe(readParams).subscribe((ops: OperationResult) => {
             // VALUE: actual data from BLE device (in base64 encoding)
             if (ops.value) {
               this.processData(this.bluetoothle.encodedStringToBytes(ops.value));
             }
           });
+
+          this.writeLightData(0);
         })
         .catch(e => console.log(e));
     });
@@ -234,37 +270,21 @@ export class HomePage implements OnInit {
 
   // converts base64 data to useable data for the app UI
   private processData(raw: Uint8Array) {
-    console.log('raw', raw);
-    console.log('raw[0]', raw[0]);
-    console.log('raw[1]', raw[1]);
-    console.log('raw[2]', raw[2]);
-    console.log('raw[3]', raw[3]);
-    console.log('raw[4]', raw[4]);
-    console.log('raw[5]', raw[5]);
-    console.log('raw[6]', raw[6]);
-    console.log('raw[7]', raw[7]);
-    console.log('raw[8]', raw[8]);
-    console.log('raw[9]', raw[9]);
-    console.log('raw[10]', raw[10]);
-    console.log('raw[11]', raw[11]);
 
     const bufferTemperature = new ArrayBuffer(4);
-    const f32Temperature = new Float32Array(bufferTemperature); // [0]
-    const ui8Temperature = new Uint8Array(bufferTemperature); // [0, 0, 0, 0]
+    const f32Temperature = new Float32Array(bufferTemperature);
+    const ui8Temperature = new Uint8Array(bufferTemperature);
 
     const bufferHumidity = new ArrayBuffer(4);
-    const f32Humidity = new Float32Array(bufferHumidity); // [0]
-    const ui8Humidity = new Uint8Array(bufferHumidity); // [0, 0, 0, 0]
+    const f32Humidity = new Float32Array(bufferHumidity);
+    const ui8Humidity = new Uint8Array(bufferHumidity);
 
     ui8Temperature[0] = raw[0];
     ui8Temperature[1] = raw[1];
     ui8Temperature[2] = raw[2];
     ui8Temperature[3] = raw[3];
 
-    console.log('f32Temperature', f32Temperature);
-    console.log('f32Temperature[0]', f32Temperature[0]);
     this.temperature = Math.round(f32Temperature[0]);
-    console.log('temperature', this.temperature);
     this.temperatureProgress = 100 * this.temperature / (LimitTemperature.High.valueOf() + LimitTemperature.OK.valueOf());
     this.temperatureStatus = dataToSpecMap.temperature(this.temperature);
 
@@ -273,27 +293,25 @@ export class HomePage implements OnInit {
     ui8Humidity[2] = raw[6];
     ui8Humidity[3] = raw[7];
 
-    console.log('f32Humidity', f32Humidity);
-    console.log('f32Humidity[0]', f32Humidity[0]);
     this.humidity = Math.round(f32Humidity[0]);
-    console.log('humidity', this.humidity);
     this.humidityProgress = this.humidity;
     this.humidityStatus = dataToSpecMap.humidity(this.humidity);
 
     const bufferLuminosity = Buffer.from([raw[8], raw[9]]);
     this.luminosity = bufferLuminosity.readInt16LE(0);
-    console.log('luminosity', this.luminosity);
     this.luminosityProgress = 100 * (this.luminosity / 65535.0);
     this.luminosityStatus = dataToSpecMap.luminosity(this.luminosity);
 
     const bufferFertility = Buffer.from([raw[10], raw[11]]);
-    this.fertility = bufferFertility.readInt16LE(0);
-    console.log('fertility', this.fertility);
-    this.fertilityProgress = 100 * this.fertility / (LimitFertility.High.valueOf() + LimitFertility.OK.valueOf());
+    const fertility = bufferFertility.readInt16LE(0);
+    this.fertility = 100 * fertility / fertilityLimit;
+    this.fertilityProgress = this.fertility;
     this.fertilityStatus = dataToSpecMap.fertility(this.fertility);
   }
 
   ionViewDidEnter() {
+    console.log('home page has fully loaded');
+    this.splashScreen.hide();
     // event listener for slide change events
     this.slideChange$ = this.slides.ionSlideDidChange.subscribe(() => {
       this.ionSlideDidChange();
@@ -431,11 +449,28 @@ export class HomePage implements OnInit {
 
   // bluetooth data write command should go in this function
   toggleLight() {
-    this.lightOn = !this.lightOn;
-    if (this.lightOn) {
-      this.imgLight = 'assets/images/icon-light-on.png';
+    if (!this.lightOn) {
+      this.writeLightData(255);
     } else {
-      this.imgLight = 'assets/images/icon-light.png';
+      this.writeLightData(0);
     }
+  }
+
+  private encodeWriteData(uint8: Uint8Array): string {
+    return this.bluetoothle.bytesToEncodedString(uint8);
+  }
+
+  private writeLightData(val: number) {
+    const uint8 = new Uint8Array(2);
+    // tslint:disable-next-line:no-bitwise
+    uint8[0] = val & 0xFF;
+    // tslint:disable-next-line:no-bitwise
+    uint8[1] = val >> 8 & 0xFF;
+    this.writeParams.value = this.encodeWriteData(uint8);
+    this.bluetoothle.write(this.writeParams).then(res => {
+      if (res.status === 'written') {
+        this.lightOn = val === 255;
+      }
+    }).catch(e => console.log('error:', e));
   }
 }

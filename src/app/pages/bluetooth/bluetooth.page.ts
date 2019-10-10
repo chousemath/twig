@@ -92,11 +92,6 @@ export class BluetoothPage implements OnInit {
     });
     await loading.present();
     this.startScan$ = this.bluetoothle.startScan({}).subscribe(async (res: ScanStatus) => {
-      console.log('\n\n=============');
-      console.log('scan name:', res.name);
-      console.log('scan status:', res.status);
-      console.log('scan address:', res.address);
-      console.log('=============\n\n');
       if (res.status === 'scanResult') {
         if (res.name.toLowerCase() === deviceName) {
           this.loadingCtrl.dismiss();
