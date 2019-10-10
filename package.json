@@ -29,6 +29,7 @@
     "@ng-bootstrap/ng-bootstrap": "^5.1.1",
     "@ng-bootstrap/schematics": "^2.0.0-alpha.1",
     "bootstrap": "^4.0.0",
+    "buffer": "^5.4.3",
     "cordova-ios": "^5.0.1",
     "cordova-plugin-bluetoothle": "^4.5.5",
     "cordova-sqlite-storage": "^3.4.0",

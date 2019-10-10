@@ -4,9 +4,7 @@ import { Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { BluetoothLE, DeviceInfo, OperationResult, DescriptorParams, Device } from '@ionic-native/bluetooth-le/ngx';
 import { Storage } from '@ionic/storage';
-
-// circumvent typescript compiler error
-declare const Buffer;
+import { Buffer } from 'buffer';
 
 // namespace for plant-related info starts with "twig-plant-"
 const keyName = 'twig-plant-name';
@@ -224,12 +222,9 @@ export class HomePage implements OnInit {
              notification/indication based on the characteristic's properties.
           */
           this.ops$ = this.bluetoothle.subscribe(params).subscribe((ops: OperationResult) => {
-            // console.log('\nOperationResult:');
-            // console.log(ops);
             // VALUE: actual data from BLE device (in base64 encoding)
             if (ops.value) {
-              const raw: Uint8Array = this.bluetoothle.encodedStringToBytes(ops.value);
-              this.processData(raw);
+              this.processData(this.bluetoothle.encodedStringToBytes(ops.value));
             }
           });
         })
@@ -239,19 +234,19 @@ export class HomePage implements OnInit {
 
   // converts base64 data to useable data for the app UI
   private processData(raw: Uint8Array) {
-    // console.log('raw', raw);
-    // console.log('raw[0]', raw[0]);
-    // console.log('raw[1]', raw[1]);
-    // console.log('raw[2]', raw[2]);
-    // console.log('raw[3]', raw[3]);
-    // console.log('raw[4]', raw[4]);
-    // console.log('raw[5]', raw[5]);
-    // console.log('raw[6]', raw[6]);
-    // console.log('raw[7]', raw[7]);
-    // console.log('raw[8]', raw[8]);
-    // console.log('raw[9]', raw[9]);
-    // console.log('raw[10]', raw[10]);
-    // console.log('raw[11]', raw[11]);
+    console.log('raw', raw);
+    console.log('raw[0]', raw[0]);
+    console.log('raw[1]', raw[1]);
+    console.log('raw[2]', raw[2]);
+    console.log('raw[3]', raw[3]);
+    console.log('raw[4]', raw[4]);
+    console.log('raw[5]', raw[5]);
+    console.log('raw[6]', raw[6]);
+    console.log('raw[7]', raw[7]);
+    console.log('raw[8]', raw[8]);
+    console.log('raw[9]', raw[9]);
+    console.log('raw[10]', raw[10]);
+    console.log('raw[11]', raw[11]);
 
     const bufferTemperature = new ArrayBuffer(4);
     const f32Temperature = new Float32Array(bufferTemperature); // [0]
@@ -260,9 +255,6 @@ export class HomePage implements OnInit {
     const bufferHumidity = new ArrayBuffer(4);
     const f32Humidity = new Float32Array(bufferHumidity); // [0]
     const ui8Humidity = new Uint8Array(bufferHumidity); // [0, 0, 0, 0]
-
-    const bufferLuminosity = Buffer.from([raw[8], raw[9]]);
-    const bufferFertility = Buffer.from([raw[10], raw[11]]);
 
     ui8Temperature[0] = raw[0];
     ui8Temperature[1] = raw[1];
@@ -285,14 +277,16 @@ export class HomePage implements OnInit {
     console.log('f32Humidity[0]', f32Humidity[0]);
     this.humidity = Math.round(f32Humidity[0]);
     console.log('humidity', this.humidity);
-    this.humidityProgress = 100 * this.humidity / (LimitHumidity.High.valueOf() + LimitHumidity.OK.valueOf());
+    this.humidityProgress = this.humidity;
     this.humidityStatus = dataToSpecMap.humidity(this.humidity);
 
+    const bufferLuminosity = Buffer.from([raw[8], raw[9]]);
     this.luminosity = bufferLuminosity.readInt16LE(0);
     console.log('luminosity', this.luminosity);
-    this.luminosityProgress = 100 * this.luminosity / (LimitLuminosity.High.valueOf() + LimitLuminosity.OK.valueOf());
+    this.luminosityProgress = 100 * (this.luminosity / 65535.0);
     this.luminosityStatus = dataToSpecMap.luminosity(this.luminosity);
 
+    const bufferFertility = Buffer.from([raw[10], raw[11]]);
     this.fertility = bufferFertility.readInt16LE(0);
     console.log('fertility', this.fertility);
     this.fertilityProgress = 100 * this.fertility / (LimitFertility.High.valueOf() + LimitFertility.OK.valueOf());
