@@ -2,7 +2,6 @@ import { Component, ViewChild, OnInit } from '@angular/core';
 import { IonSlides, AlertController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
-import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import {
   BluetoothLE, DeviceInfo, OperationResult, DescriptorParams, Device,
   WriteCharacteristicParams
@@ -190,7 +189,6 @@ export class HomePage implements OnInit {
     public bluetoothle: BluetoothLE,
     public alertController: AlertController,
     private storage: Storage,
-    private splashScreen: SplashScreen,
   ) {
     // this.randomData();
     // this.randInterval = setInterval(() => this.randomData(), 1000);
@@ -310,8 +308,6 @@ export class HomePage implements OnInit {
   }
 
   ionViewDidEnter() {
-    console.log('home page has fully loaded');
-    this.splashScreen.hide();
     // event listener for slide change events
     this.slideChange$ = this.slides.ionSlideDidChange.subscribe(() => {
       this.ionSlideDidChange();
