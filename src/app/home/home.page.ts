@@ -185,8 +185,8 @@ export class HomePage implements OnInit {
     public alertController: AlertController,
     private storage: Storage,
   ) {
-    this.randomData();
-    this.randInterval = setInterval(() => this.randomData(), 1000);
+    // this.randomData();
+    // this.randInterval = setInterval(() => this.randomData(), 1000);
   }
 
   ngOnInit() {
@@ -228,10 +228,8 @@ export class HomePage implements OnInit {
             // console.log(ops);
             // VALUE: actual data from BLE device (in base64 encoding)
             if (ops.value) {
-              console.log('value 1:', ops.value);
-              console.log('value 2:', this.bluetoothle.encodedStringToBytes(ops.value));
-              // convert Base64 data into useable data for UI
-              // this.processData(ops.value);
+              const raw: Uint8Array = this.bluetoothle.encodedStringToBytes(ops.value);
+              this.processData(raw);
             }
           });
         })
@@ -240,10 +238,65 @@ export class HomePage implements OnInit {
   }
 
   // converts base64 data to useable data for the app UI
-  private processData(base64Data: string) {
-    const buff = new Buffer(base64Data, 'base64');
-    const textData = buff.toString('ascii');
-    console.log(textData);
+  private processData(raw: Uint8Array) {
+    // console.log('raw', raw);
+    // console.log('raw[0]', raw[0]);
+    // console.log('raw[1]', raw[1]);
+    // console.log('raw[2]', raw[2]);
+    // console.log('raw[3]', raw[3]);
+    // console.log('raw[4]', raw[4]);
+    // console.log('raw[5]', raw[5]);
+    // console.log('raw[6]', raw[6]);
+    // console.log('raw[7]', raw[7]);
+    // console.log('raw[8]', raw[8]);
+    // console.log('raw[9]', raw[9]);
+    // console.log('raw[10]', raw[10]);
+    // console.log('raw[11]', raw[11]);
+
+    const bufferTemperature = new ArrayBuffer(4);
+    const f32Temperature = new Float32Array(bufferTemperature); // [0]
+    const ui8Temperature = new Uint8Array(bufferTemperature); // [0, 0, 0, 0]
+
+    const bufferHumidity = new ArrayBuffer(4);
+    const f32Humidity = new Float32Array(bufferHumidity); // [0]
+    const ui8Humidity = new Uint8Array(bufferHumidity); // [0, 0, 0, 0]
+
+    const bufferLuminosity = Buffer.from([raw[8], raw[9]]);
+    const bufferFertility = Buffer.from([raw[10], raw[11]]);
+
+    ui8Temperature[0] = raw[0];
+    ui8Temperature[1] = raw[1];
+    ui8Temperature[2] = raw[2];
+    ui8Temperature[3] = raw[3];
+
+    console.log('f32Temperature', f32Temperature);
+    console.log('f32Temperature[0]', f32Temperature[0]);
+    this.temperature = Math.round(f32Temperature[0]);
+    console.log('temperature', this.temperature);
+    this.temperatureProgress = 100 * this.temperature / (LimitTemperature.High.valueOf() + LimitTemperature.OK.valueOf());
+    this.temperatureStatus = dataToSpecMap.temperature(this.temperature);
+
+    ui8Humidity[0] = raw[4];
+    ui8Humidity[1] = raw[5];
+    ui8Humidity[2] = raw[6];
+    ui8Humidity[3] = raw[7];
+
+    console.log('f32Humidity', f32Humidity);
+    console.log('f32Humidity[0]', f32Humidity[0]);
+    this.humidity = Math.round(f32Humidity[0]);
+    console.log('humidity', this.humidity);
+    this.humidityProgress = 100 * this.humidity / (LimitHumidity.High.valueOf() + LimitHumidity.OK.valueOf());
+    this.humidityStatus = dataToSpecMap.humidity(this.humidity);
+
+    this.luminosity = bufferLuminosity.readInt16LE(0);
+    console.log('luminosity', this.luminosity);
+    this.luminosityProgress = 100 * this.luminosity / (LimitLuminosity.High.valueOf() + LimitLuminosity.OK.valueOf());
+    this.luminosityStatus = dataToSpecMap.luminosity(this.luminosity);
+
+    this.fertility = bufferFertility.readInt16LE(0);
+    console.log('fertility', this.fertility);
+    this.fertilityProgress = 100 * this.fertility / (LimitFertility.High.valueOf() + LimitFertility.OK.valueOf());
+    this.fertilityStatus = dataToSpecMap.fertility(this.fertility);
   }
 
   ionViewDidEnter() {

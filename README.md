@@ -41,3 +41,22 @@ ui8[0]=205; ui8[1]=204; ui8[2]=188; ui8[3]=65;
 f32 // Float32Array [ 23.600000381469727 ]
 f32[0] // 23.600000381469727
 ```
+
+```javascript
+> const buf = Buffer.from([243,12]);
+undefined
+> console.log(buf.readInt16BE(0));
+-3316
+undefined
+> console.log(buf.readInt16LE(0));
+3315
+undefined
+> const buf2 = Buffer.from([243,12]);
+undefined
+> const buf3 = Buffer.from([27,1]);
+undefined
+> console.log(buf3.readInt16LE(0));
+283
+undefined
+> Soil Humidity: 243,12
+```
