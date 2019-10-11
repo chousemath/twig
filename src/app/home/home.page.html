@@ -9,17 +9,17 @@
       <div class="container-page">
         <div class="spec-spacer-header"></div>
         <div class="spec-title-container">
-          <span class="title-text">공기습다</span>
+          <span class="title-text">비옥도</span>
         </div>
         <div class="spec-spacer-1"></div>
         <div class="spec-container">
           <div class="spec-container-inner">
             <app-progress
-              [textTop1]="humidityStatus"
+              [textTop1]="'적절'"
               [textTop2]=""
-              [value]="humidity"
-              [unit]="'%'"
-              [progress]="humidityProgress"
+              [value]="1620"
+              [unit]="'μS/cm'"
+              [progress]="50"
             ></app-progress>
           </div>
         </div>
@@ -127,41 +127,28 @@
         <div class="spec-spacer-footer"></div>
       </div>
     </ion-slide>
-    <!-- <ion-slide>
+    <ion-slide>
       <div class="container-page">
         <div class="spec-spacer-header"></div>
         <div class="spec-title-container">
-          <span class="title-text">대기질</span>
+          <span class="title-text">습다</span>
         </div>
         <div class="spec-spacer-1"></div>
         <div class="spec-container">
           <div class="spec-container-inner">
-            <div class="spec-split-container">
-              <div class="left">
-                <app-progress
-                  [textTop1]="'CO²'"
-                  [textTop2]="co2Status"
-                  [value]="co2"
-                  [unit]=""
-                  [progress]="co2Progress"
-                ></app-progress>
-              </div>
-              <div class="right">
-                <app-progress
-                  [textTop1]="'미세먼지'"
-                  [textTop2]="dustStatus"
-                  [value]="dust"
-                  [unit]=""
-                  [progress]="dustProgress"
-                ></app-progress>
-              </div>
-            </div>
+            <app-progress
+              [textTop1]="humidityStatus"
+              [textTop2]=""
+              [value]="humidity"
+              [unit]="'%'"
+              [progress]="humidityProgress"
+            ></app-progress>
           </div>
         </div>
         <div class="spec-spacer-2"></div>
         <div class="spec-spacer-footer"></div>
       </div>
-    </ion-slide> -->
+    </ion-slide>
   </ion-slides>
 
   <div id="name-container">
@@ -278,7 +265,13 @@
           class="indicator-icon indicator-inactive"
         />
       </div>
-      <div class="slide-indicator-slot"></div>
+      <div class="slide-indicator-slot">
+        <img
+          *ngIf="indicator10"
+          [src]="indicator10"
+          class="indicator-icon indicator-inactive"
+        />
+      </div>
       <div class="slide-indicator-spacer"></div>
     </div>
   </div>

@@ -1,4 +1,4 @@
-import { Component, ViewChild, OnInit } from '@angular/core';
+import { Component, ViewChild, OnInit, NgZone } from '@angular/core';
 import { IonSlides, AlertController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
@@ -13,9 +13,16 @@ import * as _ from 'lodash';
 // namespace for plant-related info starts with "twig-plant-"
 const keyName = 'twig-plant-name';
 const keySubname = 'twig-plant-subname';
-const fertilityLimit = 10000;
+// const fertilityLimit = 10000;
 
 const defaultProgress = 50;
+
+enum SoilHumidity {
+  InAir = 3400,
+  InWater = 1350,
+  Diff = 3400 - 1350,
+}
+
 enum SpecStatus {
   Appropriate = '적정',
   Shortage = '부족',
@@ -70,11 +77,11 @@ enum LimitFertility {
 // a convenience method for converting raw numeric value to status message
 const dataToSpec = (limit: any, spec: any, value: number) => {
   if (value < limit.OK.valueOf()) {
-    return spec.Low.valueOf();
+    return spec.Low;
   } else if (value < limit.High.valueOf()) {
-    return spec.OK.valueOf();
+    return spec.OK;
   }
-  return spec.High.valueOf();
+  return spec.High;
 };
 // convenience object to get status messages for each specific plant attribute
 const dataToSpecMap = {
@@ -93,7 +100,7 @@ const icons = [
   'assets/images/icon-current-on.png',
   'assets/images/icon-luminosity-on.png',
   'assets/images/icon-humidity-on.png',
-  // 'assets/images/icon-dust-on.png',
+  'assets/images/icon-dust-on.png',
 ];
 const iconLimit = icons.length;
 // helper function to make sure the navigator does not crash the app
@@ -139,9 +146,9 @@ export class HomePage implements OnInit {
   public indicator5 = icons[2];
   public indicator6 = icons[3];
   public indicator7 = icons[4];
-  // public indicator8 = icons[5];
-  public indicator8 = '';
+  public indicator8 = icons[5];
   public indicator9 = '';
+  public indicator10 = '';
 
   // remove this before going into production
   private randInterval: any;
@@ -183,24 +190,27 @@ export class HomePage implements OnInit {
 
   private device$: Subscription;
   private ops$: Subscription;
+  private skipCount = 0;
 
   constructor(
     private activatedRoute: ActivatedRoute,
     public bluetoothle: BluetoothLE,
     public alertController: AlertController,
     private storage: Storage,
+    private zone: NgZone,
   ) {
-    // this.randomData();
-    // this.randInterval = setInterval(() => this.randomData(), 1000);
   }
 
   ngOnInit() {
+    console.log('Main page loading...');
     // The address/identifier provided by the scan's return object
     this.address = this.activatedRoute.snapshot.paramMap.get('address');
     const addr: any = { address: this.address };
     // if the address is x, that means that this app is just in UI/UX mode (no BLE connection)
     if (addr === 'x') {
       console.log('bluetooth connection has been bypassed');
+      this.randomData();
+      this.randInterval = setInterval(() => this.randomData(), 1000);
       return;
     }
 
@@ -215,10 +225,6 @@ export class HomePage implements OnInit {
       this.bluetoothle
         .discover({ address: this.address, clearCache: true })
         .then((resDiscover: Device) => { // DISCOVERY DATA
-          console.log('\nDevice:\n');
-          console.log(resDiscover);
-
-          console.log('getting the props');
           const props: Array<any> = _.flatten(resDiscover.services.map(serv => {
             return serv.characteristics.map(ch => {
               return Object.assign(ch.properties, {
@@ -227,27 +233,19 @@ export class HomePage implements OnInit {
               });
             });
           }));
-          console.log(props);
-
           const readData = props.filter(p => p.notify && p.read)[0];
-          console.log('readData:', readData);
-
           const readParams: DescriptorParams = {
             address: this.address,
             characteristic: readData.characteristicUUID,
             service: readData.serviceUUID,
           };
-          console.log('readParams:', readParams);
-
           const writeData = props.filter(p => p.write && p.read)[0];
-          console.log('writeData:', writeData);
           this.writeParams = {
             address: this.address,
             characteristic: writeData.characteristicUUID,
             service: writeData.serviceUUID,
             value: '0',
           };
-          console.log('this.writeParams:', this.writeParams);
           /* Subscribe to a particular service's characteristic.
              Once a subscription is no longer needed, execute unsubscribe in a similar fashion.
              The Client Configuration descriptor will automatically be written to enable
@@ -268,7 +266,15 @@ export class HomePage implements OnInit {
 
   // converts base64 data to useable data for the app UI
   private processData(raw: Uint8Array) {
+    // sensor data comes in very quickly
+    // there is no need to update the UI for every sensor input
+    if (this.skipCount < 5) { // arbitrary update every 5 sensor signals
+      this.skipCount++;
+      return;
+    }
+    this.skipCount = 0;
 
+    let ok = 0;
     const bufferTemperature = new ArrayBuffer(4);
     const f32Temperature = new Float32Array(bufferTemperature);
     const ui8Temperature = new Uint8Array(bufferTemperature);
@@ -282,29 +288,87 @@ export class HomePage implements OnInit {
     ui8Temperature[2] = raw[2];
     ui8Temperature[3] = raw[3];
 
-    this.temperature = Math.round(f32Temperature[0]);
-    this.temperatureProgress = 100 * this.temperature / (LimitTemperature.High.valueOf() + LimitTemperature.OK.valueOf());
-    this.temperatureStatus = dataToSpecMap.temperature(this.temperature);
+    const temperature = Math.round(f32Temperature[0]);
+    let temperatureProgress, temperatureStatus;
+    if (temperature > LimitTemperature.High.valueOf()) {
+      temperatureProgress = 100;
+      temperatureStatus = SpecTemperature.High.valueOf();
+    } else {
+      temperatureStatus = dataToSpecMap.temperature(temperature);
+      temperatureProgress = 100 * (temperature / LimitTemperature.High.valueOf());
+      if (temperatureStatus === SpecTemperature.OK) { ok++; }
+    }
 
     ui8Humidity[0] = raw[4];
     ui8Humidity[1] = raw[5];
     ui8Humidity[2] = raw[6];
     ui8Humidity[3] = raw[7];
 
-    this.humidity = Math.round(f32Humidity[0]);
-    this.humidityProgress = this.humidity;
-    this.humidityStatus = dataToSpecMap.humidity(this.humidity);
+    const humidity = Math.round(f32Humidity[0]);
+    let humidityProgress, humidityStatus;
+    if (humidity > LimitHumidity.High.valueOf()) {
+      humidityProgress = 100;
+      humidityStatus = SpecHumidity.High.valueOf();
+    } else {
+      humidityStatus = dataToSpecMap.humidity(humidity);
+      humidityProgress = 100 * (humidity / LimitHumidity.High.valueOf());
+      if (humidityStatus === SpecHumidity.OK) { ok++; }
+    }
 
     const bufferLuminosity = Buffer.from([raw[8], raw[9]]);
-    this.luminosity = bufferLuminosity.readInt16LE(0);
-    this.luminosityProgress = 100 * (this.luminosity / 65535.0);
-    this.luminosityStatus = dataToSpecMap.luminosity(this.luminosity);
+    const luminosity = bufferLuminosity.readInt16LE(0);
+    let luminosityProgress, luminosityStatus;
+    if (luminosity > LimitLuminosity.High.valueOf()) {
+      luminosityProgress = 100;
+      luminosityStatus = SpecLuminosity.High.valueOf();
+    } else {
+      luminosityStatus = dataToSpecMap.luminosity(luminosity);
+      luminosityProgress = 100 * (luminosity / LimitLuminosity.High.valueOf());
+      if (luminosityStatus === SpecLuminosity.OK) { ok++; }
+    }
 
     const bufferFertility = Buffer.from([raw[10], raw[11]]);
-    const fertility = bufferFertility.readInt16LE(0);
-    this.fertility = 100 * fertility / fertilityLimit;
-    this.fertilityProgress = this.fertility;
-    this.fertilityStatus = dataToSpecMap.fertility(this.fertility);
+    let fertility = bufferFertility.readInt16LE(0);
+    if (SoilHumidity.InWater.valueOf() > fertility) {
+      fertility = 100;
+    } else if (fertility > SoilHumidity.InAir.valueOf()) {
+      fertility = 0;
+    } else {
+      // fertility = Math.round(100 - (fertility - SoilHumidity.InWater.valueOf()) / (SoilHumidity.Diff.valueOf()));
+      fertility = 100 * (SoilHumidity.InAir.valueOf() - fertility) / SoilHumidity.Diff.valueOf();
+    }
+
+    let fertilityStatus;
+    if (fertility > LimitFertility.High.valueOf()) {
+      fertilityStatus = SpecFertility.High.valueOf();
+    } else {
+      fertilityStatus = dataToSpecMap.fertility(fertility);
+      if (fertilityStatus === SpecFertility.OK) { ok++; }
+    }
+
+    const currentStatus = (ok >= 3) ? 'Healthy' : 'Unhealthy';
+    const currentProgress = 25 * ok;
+
+    this.zone.run(() => {
+      this.temperature = temperature;
+      this.temperatureProgress = temperatureProgress;
+      this.temperatureStatus = temperatureStatus.valueOf();
+
+      this.humidity = humidity;
+      this.humidityProgress = humidityProgress;
+      this.humidityStatus = humidityStatus.valueOf();
+
+      this.luminosity = luminosity;
+      this.luminosityProgress = luminosityProgress;
+      this.luminosityStatus = luminosityStatus.valueOf();
+
+      this.fertility = fertility;
+      this.fertilityProgress = fertility;
+      this.fertilityStatus = fertilityStatus.valueOf();
+
+      this.currentStatus = currentStatus;
+      this.currentProgress = currentProgress;
+    });
   }
 
   ionViewDidEnter() {
@@ -357,6 +421,7 @@ export class HomePage implements OnInit {
     this.indicator7 = safeIcon(i + 2);
     this.indicator8 = safeIcon(i + 3);
     this.indicator9 = safeIcon(i + 4);
+    this.indicator10 = safeIcon(i + 5);
   }
 
   public slidePrev() {
@@ -404,13 +469,15 @@ export class HomePage implements OnInit {
       ]
     });
     alert.onDidDismiss().then(data => {
-      console.log(data);
       if (data.role === 'confirm') {
         // name data is stored in device local storage
         this.storage.set(keyName, data.data.values.name);
         this.storage.set(keySubname, data.data.values.subname);
-        this.name = data.data.values.name;
-        this.subname = data.data.values.subname;
+
+        this.zone.run(() => {
+          this.name = data.data.values.name;
+          this.subname = data.data.values.subname;
+        });
       }
     }).catch(e => console.log(e));
     await alert.present();
@@ -420,21 +487,21 @@ export class HomePage implements OnInit {
   private randomData() {
     this.fertility = Math.round(Math.random() * (LimitFertility.High.valueOf() + LimitFertility.OK.valueOf()));
     this.fertilityProgress = 100 * this.fertility / (LimitFertility.High.valueOf() + LimitFertility.OK.valueOf());
-    this.fertilityStatus = dataToSpecMap.fertility(this.fertility);
+    this.fertilityStatus = dataToSpecMap.fertility(this.fertility).valueOf();
 
     this.temperature = Math.round(Math.random() * (LimitTemperature.High.valueOf() + LimitTemperature.OK.valueOf()));
     this.temperatureProgress = 100 * this.temperature / (LimitTemperature.High.valueOf() + LimitTemperature.OK.valueOf());
-    this.temperatureStatus = dataToSpecMap.temperature(this.temperature);
+    this.temperatureStatus = dataToSpecMap.temperature(this.temperature).valueOf();
 
     this.currentProgress = Math.round(Math.random() * 100);
 
     this.luminosity = Math.round(Math.random() * (LimitLuminosity.High.valueOf() + LimitLuminosity.OK.valueOf()));
     this.luminosityProgress = 100 * this.luminosity / (LimitLuminosity.High.valueOf() + LimitLuminosity.OK.valueOf());
-    this.luminosityStatus = dataToSpecMap.luminosity(this.luminosity);
+    this.luminosityStatus = dataToSpecMap.luminosity(this.luminosity).valueOf();
 
     this.humidity = Math.round(Math.random() * (LimitHumidity.High.valueOf() + LimitHumidity.OK.valueOf()));
     this.humidityProgress = 100 * this.humidity / (LimitHumidity.High.valueOf() + LimitHumidity.OK.valueOf());
-    this.humidityStatus = dataToSpecMap.humidity(this.humidity);
+    this.humidityStatus = dataToSpecMap.humidity(this.humidity).valueOf();
 
     // this.co2 = 100 + Math.round(Math.random() * 100);
     // this.co2Progress = Math.round(100 * (this.co2 / 200));

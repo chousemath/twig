@@ -11,6 +11,7 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { BluetoothLE } from '@ionic-native/bluetooth-le/ngx';
 import { IonicStorageModule } from '@ionic/storage';
+import { HomePageModule } from './home/home.module';
 
 
 
@@ -23,6 +24,7 @@ import { IonicStorageModule } from '@ionic/storage';
     AppRoutingModule,
     NgbModule,
     IonicStorageModule.forRoot(),
+    HomePageModule,
   ],
   providers: [
     StatusBar,
