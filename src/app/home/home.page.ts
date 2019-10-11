@@ -335,7 +335,7 @@ export class HomePage implements OnInit {
       fertility = 0;
     } else {
       // fertility = Math.round(100 - (fertility - SoilHumidity.InWater.valueOf()) / (SoilHumidity.Diff.valueOf()));
-      fertility = 100 * (SoilHumidity.InAir.valueOf() - fertility) / SoilHumidity.Diff.valueOf();
+      fertility = Math.round(100 * (SoilHumidity.InAir.valueOf() - fertility) / SoilHumidity.Diff.valueOf());
     }
 
     let fertilityStatus;
