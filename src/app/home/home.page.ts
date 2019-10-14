@@ -18,7 +18,9 @@ const keySubname = 'twig-plant-subname';
 const defaultProgress = 50;
 
 enum SoilHumidity {
+  // this was an empiricl measurement made by me (left the sensor in air)
   InAir = 3400,
+  // this was an empirical measurement made by me (dipped the sensor in a cup of water)
   InWater = 1350,
   Diff = 3400 - 1350,
 }
@@ -30,7 +32,7 @@ enum SpecStatus {
   Bad = '나쁨',
 }
 
-// possible status messages for "luminosity"
+// possible status messages for "luminosity", https://i.imgur.com/g3LEAOI.png
 enum SpecLuminosity {
   Low = '부족',
   OK = '적절',
@@ -41,7 +43,7 @@ enum LimitLuminosity {
   OK = 100,
   High = 2500,
 }
-// possible status messages for "temperature"
+// possible status messages for "temperature", https://i.imgur.com/PSTNwNO.png
 enum SpecTemperature {
   Low = '저온',
   OK = '적절',
@@ -52,7 +54,7 @@ enum LimitTemperature {
   OK = 21,
   High = 26,
 }
-// possible status messages for "humidity"
+// possible status messages for "humidity", https://i.imgur.com/rE3tXZn.png
 enum SpecHumidity {
   Low = '건조',
   OK = '적절',
@@ -63,7 +65,7 @@ enum LimitHumidity {
   OK = 65,
   High = 85,
 }
-// possible status messages for "fertility"
+// possible status messages for "fertility", https://i.imgur.com/DhVlA0p.png
 enum SpecFertility {
   Low = '건조',
   OK = '적절',
@@ -266,8 +268,9 @@ export class HomePage implements OnInit {
 
   // converts base64 data to useable data for the app UI
   private processData(raw: Uint8Array) {
-    // sensor data comes in very quickly
-    // there is no need to update the UI for every sensor input
+    /* sensor data comes in very quickly
+     * there is no need to update the UI for every sensor input
+     */
     if (this.skipCount < 5) { // arbitrary update every 5 sensor signals
       this.skipCount++;
       return;
@@ -275,6 +278,9 @@ export class HomePage implements OnInit {
     this.skipCount = 0;
 
     let ok = 0;
+    /* Please reference the Java reference code in the README.md
+     * file for why I convert the raw data in this way
+     */
     const bufferTemperature = new ArrayBuffer(4);
     const f32Temperature = new Float32Array(bufferTemperature);
     const ui8Temperature = new Uint8Array(bufferTemperature);
@@ -346,6 +352,8 @@ export class HomePage implements OnInit {
       if (fertilityStatus === SpecFertility.OK) { ok++; }
     }
 
+    // * healthy/ unhealthy 여부
+    // 조도,온도,습도,토양습도 -> 총 4가지 중 3가지가 충족할 경우 healthy
     const currentStatus = (ok >= 3) ? 'Healthy' : 'Unhealthy';
     const currentProgress = 25 * ok;
 
@@ -410,7 +418,9 @@ export class HomePage implements OnInit {
     const i: number = await this.slides.getActiveIndex();
     this.currentSlide = i;
     this.showIndicatorDot = i !== 2;
-
+    /* the slide indicator works simply by swapping
+     * the correct images in and out of each slot
+     */
     this.indicator0 = safeIcon(i - 5);
     this.indicator1 = safeIcon(i - 4);
     this.indicator2 = safeIcon(i - 3);
@@ -424,6 +434,9 @@ export class HomePage implements OnInit {
     this.indicator10 = safeIcon(i + 5);
   }
 
+  /* just some dumb convenience methods because
+   * I hate typing
+   */
   public slidePrev() {
     this.slides.slidePrev();
   }
@@ -473,7 +486,6 @@ export class HomePage implements OnInit {
         // name data is stored in device local storage
         this.storage.set(keyName, data.data.values.name);
         this.storage.set(keySubname, data.data.values.subname);
-
         this.zone.run(() => {
           this.name = data.data.values.name;
           this.subname = data.data.values.subname;
@@ -503,15 +515,24 @@ export class HomePage implements OnInit {
     this.humidityProgress = 100 * this.humidity / (LimitHumidity.High.valueOf() + LimitHumidity.OK.valueOf());
     this.humidityStatus = dataToSpecMap.humidity(this.humidity).valueOf();
 
+    /* An air quality page was included in the original design, but
+     * the hardware engineer indicated that there was no such
+     * sensors on the smart flowerpot, therefore all air quality
+     * related code has been commented out
+     */
     // this.co2 = 100 + Math.round(Math.random() * 100);
     // this.co2Progress = Math.round(100 * (this.co2 / 200));
-
     // this.dust = 100 + Math.round(Math.random() * 100);
     // this.dustProgress = Math.round(100 * (this.dust / 200));
   }
 
   // bluetooth data write command should go in this function
   toggleLight() {
+    /* Note that actually you can give the LED lamp any value between
+     * 0 and 255, but there was no clear direction in the app design
+     * files on how to handle intermediate values, therefore I assumed
+     * that the app designer simply wanted an On/Off switch for the lamp
+     */
     if (!this.lightOn) {
       this.writeLightData(255);
     } else {
@@ -526,7 +547,7 @@ export class HomePage implements OnInit {
   private writeLightData(val: number) {
     const uint8 = new Uint8Array(2);
     // tslint:disable-next-line:no-bitwise
-    uint8[0] = val & 0xFF;
+    uint8[0] = val & 0xFF; // I used the reference conversion code from the hardware engineer here
     // tslint:disable-next-line:no-bitwise
     uint8[1] = val >> 8 & 0xFF;
     this.writeParams.value = this.encodeWriteData(uint8);
