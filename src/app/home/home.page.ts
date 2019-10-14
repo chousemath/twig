@@ -295,6 +295,7 @@ export class HomePage implements OnInit {
     ui8Temperature[3] = raw[3];
 
     const temperature = Math.round(f32Temperature[0]);
+    console.log('temperature:', temperature);
     let temperatureProgress, temperatureStatus;
     if (temperature > LimitTemperature.High.valueOf()) {
       temperatureProgress = 100;
@@ -311,6 +312,7 @@ export class HomePage implements OnInit {
     ui8Humidity[3] = raw[7];
 
     const humidity = Math.round(f32Humidity[0]);
+    console.log('humidity:', humidity);
     let humidityProgress, humidityStatus;
     if (humidity > LimitHumidity.High.valueOf()) {
       humidityProgress = 100;
@@ -323,6 +325,7 @@ export class HomePage implements OnInit {
 
     const bufferLuminosity = Buffer.from([raw[8], raw[9]]);
     const luminosity = bufferLuminosity.readInt16LE(0);
+    console.log('luminosity:', luminosity);
     let luminosityProgress, luminosityStatus;
     if (luminosity > LimitLuminosity.High.valueOf()) {
       luminosityProgress = 100;
@@ -335,6 +338,7 @@ export class HomePage implements OnInit {
 
     const bufferFertility = Buffer.from([raw[10], raw[11]]);
     let fertility = bufferFertility.readInt16LE(0);
+    console.log('fertility:', fertility);
     if (SoilHumidity.InWater.valueOf() > fertility) {
       fertility = 100;
     } else if (fertility > SoilHumidity.InAir.valueOf()) {

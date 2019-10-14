@@ -196,6 +196,7 @@ $footer-height: 35px;
   }
   .section-left {
     @extend .section-generic;
+    padding-left: 16px;
   }
   .section-center {
     height: $nav-height;
@@ -203,10 +204,12 @@ $footer-height: 35px;
   }
   .section-right {
     @extend .section-generic;
+    padding-right: 16px;
   }
   .navigation-arrow {
     // width: $nav-icon;
     height: $nav-icon;
+    width: auto;
     opacity: 0.7;
   }
 }

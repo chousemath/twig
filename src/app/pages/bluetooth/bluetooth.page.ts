@@ -17,18 +17,6 @@ export class BluetoothPage implements OnInit {
   private ble$: Subscription;
   private startScan$: Subscription;
   public clickable = false;
-  private scanResults: Array<ScanStatus> = [];
-  private scanAddresses = {};
-  private buttons: Array<any> = [
-    // the default cancel button for bluetooth device selector menu
-    {
-      text: '닫기',
-      icon: 'close',
-      role: 'cancel',
-      handler: () => console.log('Cancel clicked'),
-    },
-  ];
-  private addressMap = {};
   constructor(
     private navCtrl: NavController,
     public bluetoothle: BluetoothLE,
@@ -83,7 +71,6 @@ export class BluetoothPage implements OnInit {
       await this.alertBLE();
       return;
     }
-    this.scanResults = [];
     if (this.startScan$) {
       this.startScan$.unsubscribe();
     }
