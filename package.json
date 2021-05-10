@@ -35,7 +35,7 @@
     "cordova-plugin-bluetoothle": "^4.5.5",
     "cordova-sqlite-storage": "^3.4.0",
     "core-js": "^2.5.4",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "rxjs": "~6.5.1",
     "tslib": "^1.9.0",
     "zone.js": "~0.9.1"
